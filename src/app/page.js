@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -10,29 +10,33 @@ import {
   Box,
   CircularProgress,
   Alert,
-} from '@mui/material';
+} from "@mui/material";
 import {
   People as PeopleIcon,
   Business as BusinessIcon,
   Task as TaskIcon,
-  AttachMoney as MoneyIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
+import { apiGet } from "@/utils/api";
 
 const StatCard = ({ title, count, icon, color }) => (
   <Card sx={{ mb: 2 }}>
     <CardContent>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Box>
           <Typography color="textSecondary" gutterBottom>
             {title}
           </Typography>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", color }}>
             {count !== null ? count : <CircularProgress size={24} />}
           </Typography>
         </Box>
-        <Box sx={{ color, opacity: 0.3, fontSize: 40 }}>
-          {icon}
-        </Box>
+        <Box sx={{ color, opacity: 0.3, fontSize: 40 }}>{icon}</Box>
       </Box>
     </CardContent>
   </Card>
@@ -54,21 +58,21 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const [guestsResponse, vendorsResponse, tasksResponse] = await Promise.all([
+        apiGet("/api/v1/guests/list/"),
+        apiGet("/api/v1/vendors/list/"),
+        apiGet("/api/v1/tasks/list/"),
+      ]);
 
-      const guestsResponse = await fetch(`${apiUrl}/api/v1/guests/list/`);
-      const vendorsResponse = await fetch(`${apiUrl}/api/v1/vendors/list/`);
-      const tasksResponse = await fetch(`${apiUrl}/api/v1/tasks/list/`);
-
-      if (!guestsResponse.ok || !vendorsResponse.ok || !tasksResponse.ok) {
-        throw new Error('Failed to fetch dashboard data');
+      if (!guestsResponse?.ok || !vendorsResponse?.ok || !tasksResponse?.ok) {
+        throw new Error("Failed to fetch dashboard data");
       }
 
       const guests = await guestsResponse.json();
       const vendors = await vendorsResponse.json();
       const tasks = await tasksResponse.json();
 
-      const rsvpd = guests.filter((g) => g.rsvp_status === 'accepted').length;
+      const rsvpd = guests.filter((g) => g.rsvp_status === "accepted").length;
       const remaining = tasks.filter((t) => !t.completed).length;
 
       setStats({
@@ -87,18 +91,18 @@ export default function Dashboard() {
   return (
     <Container maxWidth="lg">
       <Box sx={{ my: 4 }}>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
+        <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
           Wedding Planning Dashboard
         </Typography>
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error}. Make sure your backend API is running at {process.env.NEXT_PUBLIC_API_URL}
+            {error}. Make sure your backend API is running and you're logged in.
           </Alert>
         )}
 
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
             <CircularProgress />
           </Box>
         ) : (
@@ -138,9 +142,11 @@ export default function Dashboard() {
           </Grid>
         )}
 
-        <Box sx={{ mt: 4, p: 3, backgroundColor: '#e3f2fd', borderRadius: 1 }}>
+        <Box sx={{ mt: 4, p: 3, backgroundColor: "#e3f2fd", borderRadius: 1 }}>
           <Typography variant="body1">
-            ℹ️ Dashboard is loading data from your backend API. Click on "Guests," "Vendors," or "Tasks" in the sidebar to view and manage data.
+            ℹ️ Dashboard is loading data from your backend API. Click on
+            "Guests," "Vendors," or "Tasks" in the sidebar to view and manage
+            data.
           </Typography>
         </Box>
       </Box>

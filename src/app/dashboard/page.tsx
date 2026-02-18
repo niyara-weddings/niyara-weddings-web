@@ -15,10 +15,11 @@ import {
   People as PeopleIcon,
   Business as BusinessIcon,
   Task as TaskIcon,
-  AttachMoney as MoneyIcon,
 } from '@mui/icons-material';
+import ProtectedLayout from '@/components/ProtectedLayout';
+import { apiGet } from '@/utils/api';
 
-const StatCard = ({ title, count, icon, color }) => (
+const StatCard = ({ title, count, icon, color }: { title: string; count: number | null; icon: React.ReactNode; color: string }) => (
   <Card sx={{ mb: 2 }}>
     <CardContent>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -38,7 +39,7 @@ const StatCard = ({ title, count, icon, color }) => (
   </Card>
 );
 
-export default function Dashboard() {
+function Dashboard() {
   const [stats, setStats] = useState({
     totalGuests: null,
     guestRSVPd: null,
@@ -46,7 +47,7 @@ export default function Dashboard() {
     remainingTasks: null,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStats();
@@ -54,22 +55,20 @@ export default function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const guestsResponse = await apiGet('/api/v1/guests/list/');
+      const vendorsResponse = await apiGet('/api/v1/vendors/list/');
+      const tasksResponse = await apiGet('/api/v1/tasks/list/');
 
-      const guestsResponse = await fetch(`${apiUrl}/api/v1/guests/list/`);
-      const vendorsResponse = await fetch(`${apiUrl}/api/v1/vendors/list/`);
-      const tasksResponse = await fetch(`${apiUrl}/api/v1/tasks/list/`);
-
-      if (!guestsResponse.ok || !vendorsResponse.ok || !tasksResponse.ok) {
+      if (!guestsResponse.success || !vendorsResponse.success || !tasksResponse.success) {
         throw new Error('Failed to fetch dashboard data');
       }
 
-      const guests = await guestsResponse.json();
-      const vendors = await vendorsResponse.json();
-      const tasks = await tasksResponse.json();
+      const guests = guestsResponse.data;
+      const vendors = vendorsResponse.data;
+      const tasks = tasksResponse.data;
 
-      const rsvpd = guests.filter((g) => g.rsvp_status === 'accepted').length;
-      const remaining = tasks.filter((t) => !t.completed).length;
+      const rsvpd = guests.filter((g: { rsvp_status: string }) => g.rsvp_status === 'confirmed').length;
+      const remaining = tasks.filter((t: { is_completed: boolean }) => !t.is_completed).length;
 
       setStats({
         totalGuests: guests.length,
@@ -78,8 +77,9 @@ export default function Dashboard() {
         remainingTasks: remaining,
       });
       setLoading(false);
-    } catch (err) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -103,47 +103,55 @@ export default function Dashboard() {
           </Box>
         ) : (
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatCard
                 title="Total Guests"
                 count={stats.totalGuests}
                 icon={<PeopleIcon />}
-                color="#1976d2"
+                color="primary.main"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatCard
                 title="RSVPs Accepted"
                 count={stats.guestRSVPd}
                 icon={<PeopleIcon />}
-                color="#388e3c"
+                color="success.main"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatCard
                 title="Total Vendors"
                 count={stats.totalVendors}
                 icon={<BusinessIcon />}
-                color="#d32f2f"
+                color="error.main"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <StatCard
                 title="Remaining Tasks"
                 count={stats.remainingTasks}
                 icon={<TaskIcon />}
-                color="#f57c00"
+                color="warning.main"
               />
             </Grid>
           </Grid>
         )}
 
-        <Box sx={{ mt: 4, p: 3, backgroundColor: '#e3f2fd', borderRadius: 1 }}>
-          <Typography variant="body1">
-            ℹ️ Dashboard is loading data from your backend API. Click on "Guests," "Vendors," or "Tasks" in the sidebar to view and manage data.
+        <Box sx={{ mt: 4, p: 3, backgroundColor: 'primary.light', borderRadius: 1 }}>
+          <Typography variant="body1" color="primary.contrastText">
+            ℹ️ Dashboard is loading data from your backend API. Click on Guests, Vendors, or Tasks in the sidebar to view and manage data.
           </Typography>
         </Box>
       </Box>
     </Container>
   );
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedLayout>
+      <Dashboard />
+    </ProtectedLayout>
+  )
 }
