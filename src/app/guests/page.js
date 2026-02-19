@@ -187,8 +187,7 @@ export default function GuestsPage() {
         {guests.length === 0 && !loading && (
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Typography color="textSecondary">
-            ℹ️ Manage your guest list here. Add guests, track RSVPs, and assign &quot;plus ones.&quot;
- to get started.
+            Your guest list is currently totally empty. Unless you&apos;re planning a secret elopement (highly recommended for the budget), you should probably invite at least your mom! 💌🤐
             </Typography>
           </Box>
         )}

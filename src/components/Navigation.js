@@ -30,7 +30,7 @@ const Navigation = () => {
   const [user, setUser] = useState({ name: 'Guest', email: 'guest@example.com' });
 
   const menuItems = [
-    { label: 'Dashboard', icon: <DashboardIcon />, href: '/' },
+    { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
     { label: 'Guests', icon: <PeopleIcon />, href: '/guests' },
     { label: 'Vendors', icon: <BusinessIcon />, href: '/vendors' },
     { label: 'Tasks', icon: <TaskIcon />, href: '/tasks' },

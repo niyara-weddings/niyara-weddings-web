@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { setLogoutCallback } from '@/utils/api'; // ADDED THIS LINE
 
 const AuthContext = createContext();
 
@@ -13,9 +14,12 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Strictly use Environment Variables. Fail fast if not configured.
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     // Check if user is logged in on app start
-    const storedToken = localStorage.getItem('auth_token');
+    const storedToken = localStorage.getItem('access_token');
     const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
@@ -26,30 +30,73 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+
+
+
+  /**
+   * Helper to handle response logic within the context.
+   */
+  const handleAuthResponse = async (response) => {
+    const result = await response.json();
+    
+    if (!response.ok || !result.success) {
+      // Backend standardizes error messages into 'message'
+      throw new Error(result.message || 'Authentication operation failed');
+    }
+
+    // Success! Extract data from standardized envelope
+    const accessToken = result.data.tokens.access;
+    const userData = result.data.user;
+    
+    setToken(accessToken);
+    setUser(userData);
+    
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    
+    return { success: true };
+  };
+
+  /**
+   * Login using username/password.
+   */
+  const login = async (username, password) => {
+    if (!API_URL) return { success: false, error: "Frontend Error: API URL not set in .env.local" };
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authentication/login/`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const data = await response.json();
-      
-      setToken(data.access);
-      setUser(data.user);
-      
-      localStorage.setItem('auth_token', data.access);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      return { success: true };
+      return await handleAuthResponse(response);
     } catch (error) {
+      console.error("Login Context Error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  /**
+   * Register a new user.
+   */
+  const register = async (userData) => {
+    if (!API_URL) return { success: false, error: "Frontend Error: API URL not set in .env.local" };
+
+    try {
+      const response = await fetch(`${API_URL}/api/v1/auth/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      return await handleAuthResponse(response);
+    } catch (error) {
+      console.error("Registration Context Error:", error);
       return { success: false, error: error.message };
     }
   };
@@ -57,16 +104,22 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('access_token');
     localStorage.removeItem('user');
   };
+
+  useEffect(() => {
+    setLogoutCallback(logout); // ADDED THIS LINE (MOVED HERE)
+  }, [logout]);
 
   const value = {
     user,
     token,
     login,
+    register,
     logout,
-    loading
+    loading,
+    isAuthenticated: !!(user && token),
   };
 
   return (

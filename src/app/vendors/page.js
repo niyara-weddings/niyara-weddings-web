@@ -25,8 +25,10 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 import AddVendorModal from '@/components/AddVendorModal';
+import ProtectedLayout from '@/components/ProtectedLayout';
+import { apiGet, apiDelete } from '@/utils/api';
 
-export default function VendorsPage() {
+function VendorsPageContent() {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,18 +44,16 @@ export default function VendorsPage() {
   const fetchVendors = async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/vendors/list/`);
+      const result = await apiGet('/api/v1/vendors/list/');
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch vendors');
+      if (result.success) {
+        setVendors(result.data);
+        setError(null);
+      } else {
+        setError(result.error || result.message || 'Failed to fetch vendors');
       }
-
-      const data = await response.json();
-      setVendors(data);
-      setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -65,18 +65,15 @@ export default function VendorsPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/v1/vendors/${vendorId}/delete/`, {
-        method: 'DELETE',
-      });
+      const result = await apiDelete(`/api/v1/vendors/${vendorId}/delete/`);
 
-      if (!response.ok) {
-        throw new Error('Failed to delete vendor');
+      if (result.success) {
+        setRefreshKey((prev) => prev + 1);
+      } else {
+        setError(result.error || result.message || 'Failed to delete vendor');
       }
-
-      setRefreshKey((prev) => prev + 1);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     }
   };
 
@@ -121,7 +118,7 @@ export default function VendorsPage() {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenModal()}
-          sx={{ backgroundColor: '#1976d2' }}
+          sx={{ backgroundColor: 'primary.main' }}
         >
           Add Vendor
         </Button>
@@ -195,8 +192,8 @@ export default function VendorsPage() {
         <Box sx={{ py: 4, textAlign: 'center' }}>
           <Typography color="textSecondary">
             {vendors.length === 0
-              ? 'No vendors added yet. Click "Add Vendor" to get started.'
-              : 'No vendors match your search.'}
+              ? 'Zero vendors found. While a 100% DIY wedding sounds rustic and charming, do you really want Uncle Bob DJing your reception? Add some pros! 🎧🎂'
+              : 'No vendors match your search. They might be ignoring your emails.'}
           </Typography>
         </Box>
       )}
@@ -208,5 +205,13 @@ export default function VendorsPage() {
         vendor={editingVendor}
       />
     </Container>
+  );
+}
+
+export default function VendorsPage() {
+  return (
+    <ProtectedLayout>
+      <VendorsPageContent />
+    </ProtectedLayout>
   );
 }

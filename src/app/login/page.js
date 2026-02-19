@@ -101,6 +101,7 @@ export default function LoginPage() {
               autoFocus
               value={formData.username}
               onChange={handleChange}
+              placeholder="e.g. wanjiru kiriba"
               sx={{ mb: 2 }}
             />
             <TextField
