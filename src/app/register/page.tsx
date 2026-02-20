@@ -31,16 +31,21 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.first_name || !formData.last_name || !formData.username || !formData.email || !formData.password) {
+      setError('All fields are required');
+      return;
+    }
 
     if (formData.password !== formData.password_confirm) {
       setError('Passwords do not match');
@@ -102,7 +107,7 @@ export default function RegisterPage() {
 
           <Box component="form" onSubmit={handleSubmit} noValidate>
             <Grid container spacing={2}>
-              <Grid xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   required
                   fullWidth
@@ -114,7 +119,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   required
                   fullWidth
@@ -126,7 +131,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   required
                   fullWidth
@@ -138,7 +143,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   required
                   fullWidth
@@ -151,7 +156,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   required
                   fullWidth
@@ -164,7 +169,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                 />
               </Grid>
-              <Grid xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   required
                   fullWidth
@@ -196,9 +201,9 @@ export default function RegisterPage() {
             </Button>
 
             <Box sx={{ mt: 2, textAlign: 'center' }}>
-                            <MuiLink component={Link} href="/login" variant="body2" color="secondary">
-                  Already have an account? Sign in
-                </MuiLink>
+              <MuiLink component={Link} href="/login" variant="body2" color="secondary">
+                Already have an account? Sign in
+              </MuiLink>
             </Box>
           </Box>
         </Paper>

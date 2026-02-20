@@ -25,13 +25,14 @@ import {
 import AddGuestModal from '@/components/AddGuestModal';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet, apiDelete } from '@/utils/api';
+import { Guest } from '@/types';
 
 export default function GuestsPage() {
-  const [guests, setGuests] = useState([]);
+  const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
-  const [editingGuest, setEditingGuest] = useState(null);
+  const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -42,39 +43,39 @@ export default function GuestsPage() {
     try {
       setLoading(true);
       const result = await apiGet('/api/v1/guests/list/');
-      
+
       if (result.success) {
         setGuests(result.data);
         setError(null);
       } else {
         setError(result.error || 'Failed to fetch guests');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteGuest = async (guestId) => {
+  const handleDeleteGuest = async (guestId: number) => {
     if (!window.confirm('Are you sure you want to delete this guest?')) {
       return;
     }
 
     try {
       const result = await apiDelete(`/api/v1/guests/${guestId}/delete/`);
-      
+
       if (result.success) {
         setRefreshKey((prev) => prev + 1); // Trigger re-fetch
       } else {
         setError(result.error || 'Failed to delete guest');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
     }
   };
 
-  const handleOpenModal = (guest = null) => {
+  const handleOpenModal = (guest: Guest | null = null) => {
     setEditingGuest(guest);
     setOpenModal(true);
   };
@@ -142,13 +143,13 @@ export default function GuestsPage() {
                           py: 0.5,
                           borderRadius: 1,
                           backgroundColor:
-                            guest.rsvp_status === 'accepted'
+                            guest.rsvp_status === 'confirmed'
                               ? '#c8e6c9'
                               : guest.rsvp_status === 'declined'
                                 ? '#ffcdd2'
                                 : '#fff9c4',
                           color:
-                            guest.rsvp_status === 'accepted'
+                            guest.rsvp_status === 'confirmed'
                               ? '#2e7d32'
                               : guest.rsvp_status === 'declined'
                                 ? '#c62828'
@@ -187,7 +188,7 @@ export default function GuestsPage() {
         {guests.length === 0 && !loading && (
           <Box sx={{ py: 4, textAlign: 'center' }}>
             <Typography color="textSecondary">
-            Your guest list is currently totally empty. Unless you&apos;re planning a secret elopement (highly recommended for the budget), you should probably invite at least your mom! 💌🤐
+              Your guest list is currently totally empty. Unless you&apos;re planning a secret elopement (highly recommended for the budget), you should probably invite at least your mom! 💌🤐
             </Typography>
           </Box>
         )}

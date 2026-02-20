@@ -26,13 +26,14 @@ import {
 import AddTaskModal from '@/components/AddTaskModal';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet, apiPost, apiDelete } from '@/utils/api';
+import { Task } from '@/types';
 
 function TasksPageContent() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -50,14 +51,14 @@ function TasksPageContent() {
       } else {
         setError(result.error || 'Failed to fetch tasks');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleToggleTask = async (taskId, completed) => {
+  const handleToggleTask = async (taskId: number, completed: boolean) => {
     try {
       const result = await apiPost(`/api/v1/tasks/${taskId}/toggle/`, { completed: !completed });
 
@@ -66,12 +67,12 @@ function TasksPageContent() {
       } else {
         setError(result.error || 'Failed to toggle task');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
+  const handleDeleteTask = async (taskId: number) => {
     if (!window.confirm('Are you sure you want to delete this task?')) {
       return;
     }
@@ -84,12 +85,12 @@ function TasksPageContent() {
       } else {
         setError(result.error || 'Failed to delete task');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
     }
   };
 
-  const handleOpenModal = (task = null) => {
+  const handleOpenModal = (task: Task | null = null) => {
     setEditingTask(task);
     setOpenModal(true);
   };
@@ -106,13 +107,13 @@ function TasksPageContent() {
 
   if (loading && tasks.length === 0) {
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
-  const completedCount = tasks.filter((t) => t.completed).length;
+  const completedCount = tasks.filter((t) => t.is_completed).length;
   const totalCount = tasks.length;
 
   return (
@@ -176,18 +177,18 @@ function TasksPageContent() {
                 key={task.id}
                 hover
                 sx={{
-                  opacity: task.completed ? 0.6 : 1,
-                  textDecoration: task.completed ? 'line-through' : 'none',
+                  opacity: task.is_completed ? 0.6 : 1,
+                  textDecoration: task.is_completed ? 'line-through' : 'none',
                 }}
               >
                 <TableCell>
                   <Checkbox
-                    checked={task.completed}
-                    onChange={() => handleToggleTask(task.id, task.completed)}
+                    checked={task.is_completed}
+                    onChange={() => handleToggleTask(task.id, task.is_completed)}
                   />
                 </TableCell>
                 <TableCell>{task.title}</TableCell>
-                <TableCell>{new Date(task.due_date).toLocaleDateString()}</TableCell>
+                <TableCell>{task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Set Date'}</TableCell>
                 <TableCell>
                   <Chip
                     label={task.priority || 'Normal'}
@@ -243,9 +244,9 @@ function TasksPageContent() {
 }
 
 export default function TasksPage() {
-    return (
-        <ProtectedLayout>
-            <TasksPageContent />
-        </ProtectedLayout>
-    )
+  return (
+    <ProtectedLayout>
+      <TasksPageContent />
+    </ProtectedLayout>
+  )
 }

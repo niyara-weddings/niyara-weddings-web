@@ -1,66 +1,66 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { setLogoutCallback } from '@/utils/api'; // ADDED THIS LINE
+import { setLogoutCallback } from '@/utils/api';
+import { User } from '@/types';
 
-const AuthContext = createContext();
+interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (userData: any) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+  loading: boolean;
+  isAuthenticated: boolean;
+}
+
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Strictly use Environment Variables. Fail fast if not configured.
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    // Check if user is logged in on app start
     const storedToken = localStorage.getItem('access_token');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
     }
-    
+
     setLoading(false);
   }, []);
 
-
-
-
-  /**
-   * Helper to handle response logic within the context.
-   */
-  const handleAuthResponse = async (response) => {
+  const handleAuthResponse = async (response: Response) => {
     const result = await response.json();
-    
+
     if (!response.ok || !result.success) {
-      // Backend standardizes error messages into 'message'
       throw new Error(result.message || 'Authentication operation failed');
     }
 
-    // Success! Extract data from standardized envelope
     const accessToken = result.data.tokens.access;
+    const refreshToken = result.data.tokens.refresh;
     const userData = result.data.user;
-    
+
     setToken(accessToken);
     setUser(userData);
-    
+
     localStorage.setItem('access_token', accessToken);
+    if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
     localStorage.setItem('user', JSON.stringify(userData));
-    
+
     return { success: true };
   };
 
-  /**
-   * Login using username/password.
-   */
-  const login = async (username, password) => {
+  const login = async (username: string, password: string) => {
     if (!API_URL) return { success: false, error: "Frontend Error: API URL not set in .env.local" };
 
     try {
@@ -73,16 +73,13 @@ export function AuthProvider({ children }) {
       });
 
       return await handleAuthResponse(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login Context Error:", error);
       return { success: false, error: error.message };
     }
   };
 
-  /**
-   * Register a new user.
-   */
-  const register = async (userData) => {
+  const register = async (userData: any) => {
     if (!API_URL) return { success: false, error: "Frontend Error: API URL not set in .env.local" };
 
     try {
@@ -95,7 +92,7 @@ export function AuthProvider({ children }) {
       });
 
       return await handleAuthResponse(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration Context Error:", error);
       return { success: false, error: error.message };
     }
@@ -105,12 +102,13 @@ export function AuthProvider({ children }) {
     setToken(null);
     setUser(null);
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
   };
 
   useEffect(() => {
-    setLogoutCallback(logout); // ADDED THIS LINE (MOVED HERE)
-  }, [logout]);
+    setLogoutCallback(logout);
+  }, []);
 
   const value = {
     user,
