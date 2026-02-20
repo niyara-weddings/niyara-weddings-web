@@ -138,9 +138,9 @@ function Dashboard() {
           </Grid>
         )}
 
-        <Box sx={{ mt: 4, p: 3, backgroundColor: 'primary.light', borderRadius: 1 }}>
-          <Typography variant="body1" color="primary.contrastText">
-            ℹ️ Dashboard is loading data from your backend API. Click on Guests, Vendors, or Tasks in the sidebar to view and manage data.
+        <Box sx={{ mt: 4, p: 3, backgroundColor: 'background.default', borderRadius: 1 }}>
+          <Typography variant="body1" color="text.secondary">
+            Your dashboard is ready! Now let&apos;s start clicking around the sidebar before your partner realizes you haven&apos;t planned a single thing. 💍😅
           </Typography>
         </Box>
       </Box>

@@ -227,7 +227,7 @@ function TasksPageContent() {
       {tasks.length === 0 && !loading && (
         <Box sx={{ py: 4, textAlign: 'center' }}>
           <Typography color="textSecondary">
-            ℹ️ Keep track of your wedding planning to-dos. Assign tasks to &quot;bride,&quot; &quot;groom,&quot; or &quot;couple.&quot;
+            No tasks yet! Either you&apos;re incredibly organized, or you&apos;re about to experience a wedding-induced panic attack. Let&apos;s get scheduling before the in-laws start asking questions! 📝🏃‍♀️
           </Typography>
         </Box>
       )}
