@@ -51,7 +51,7 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
   const headers = new Headers(options.headers || {});
   options.credentials = 'include';
 
-  if (!headers.has('Content-Type')) {
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -105,7 +105,11 @@ export const apiGet = async <T = any>(endpoint: string): Promise<ApiResponse<T>>
 export const apiPost = async <T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> => {
   if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
-    const response = await fetchWithInterceptor(endpoint, { method: 'POST', body: JSON.stringify(body) });
+    const isFormData = body instanceof FormData;
+    const response = await fetchWithInterceptor(endpoint, {
+      method: 'POST',
+      body: isFormData ? body : JSON.stringify(body)
+    });
     return await handleResponse<T>(response);
   } catch (error: any) {
     return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
@@ -115,7 +119,11 @@ export const apiPost = async <T = any>(endpoint: string, body: any): Promise<Api
 export const apiPut = async <T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> => {
   if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
-    const response = await fetchWithInterceptor(endpoint, { method: 'PUT', body: JSON.stringify(body) });
+    const isFormData = body instanceof FormData;
+    const response = await fetchWithInterceptor(endpoint, {
+      method: 'PUT',
+      body: isFormData ? body : JSON.stringify(body)
+    });
     return await handleResponse<T>(response);
   } catch (error: any) {
     return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
@@ -125,7 +133,11 @@ export const apiPut = async <T = any>(endpoint: string, body: any): Promise<ApiR
 export const apiPatch = async <T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> => {
   if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
-    const response = await fetchWithInterceptor(endpoint, { method: 'PATCH', body: JSON.stringify(body) });
+    const isFormData = body instanceof FormData;
+    const response = await fetchWithInterceptor(endpoint, {
+      method: 'PATCH',
+      body: isFormData ? body : JSON.stringify(body)
+    });
     return await handleResponse<T>(response);
   } catch (error: any) {
     return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
@@ -140,4 +152,10 @@ export const apiDelete = async <T = any>(endpoint: string): Promise<ApiResponse<
   } catch (error: any) {
     return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
   }
+};
+
+export const getMediaUrl = (path: string | null | undefined): string => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${BASE_URL}${path}`;
 };

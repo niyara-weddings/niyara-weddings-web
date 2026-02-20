@@ -5,11 +5,11 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#ba3a50', // New reddish-pink
+      main: '#ba3a50', // Original reddish-pink
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#9e9e9e',  // Neutral gray
+      main: '#9e9e9e',  // Original neutral gray
       contrastText: '#ffffff',
     },
     background: {
@@ -49,7 +49,7 @@ const theme = createTheme({
         },
         containedPrimary: {
           '&:hover': {
-            backgroundColor: '#a33346', // Darker shade of the new primary
+            backgroundColor: '#a33346', // Original darker pink hover
           },
         },
       },

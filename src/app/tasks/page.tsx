@@ -24,6 +24,7 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import AddTaskModal from '@/components/AddTaskModal';
+import CustomPagination from '@/components/CustomPagination';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet, apiPost, apiDelete } from '@/utils/api';
 import { Task } from '@/types';
@@ -35,21 +36,30 @@ function TasksPageContent() {
   const [openModal, setOpenModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     fetchTasks();
-  }, [refreshKey]);
+  }, [refreshKey, page]);
 
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const result = await apiGet('/api/v1/tasks/list/');
+      const result = await apiGet(`/api/v1/tasks/list/?page=${page}`);
 
       if (result.success) {
-        setTasks(result.data);
+        if (result.data && result.data.results) {
+          setTasks(result.data.results);
+          setTotalCount(result.data.count);
+        } else {
+          setTasks(result.data);
+          setTotalCount(result.data.length);
+        }
         setError(null);
       } else {
-        setError(result.error || 'Failed to fetch tasks');
+        setError(result.message || 'Failed to fetch tasks');
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
@@ -65,7 +75,7 @@ function TasksPageContent() {
       if (result.success) {
         setRefreshKey((prev) => prev + 1);
       } else {
-        setError(result.error || 'Failed to toggle task');
+        setError(result.message || 'Failed to toggle task');
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
@@ -83,7 +93,7 @@ function TasksPageContent() {
       if (result.success) {
         setRefreshKey((prev) => prev + 1);
       } else {
-        setError(result.error || 'Failed to delete task');
+        setError(result.message || 'Failed to delete task');
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
@@ -114,7 +124,8 @@ function TasksPageContent() {
   }
 
   const completedCount = tasks.filter((t) => t.is_completed).length;
-  const totalCount = tasks.length;
+  // Local page count for progress bar on current page
+  const pageTaskCount = tasks.length;
 
   return (
     <Container maxWidth="lg">
@@ -124,7 +135,7 @@ function TasksPageContent() {
             Wedding Tasks
           </Typography>
           <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-            {completedCount} of {totalCount} tasks completed
+            {completedCount} of {pageTaskCount} tasks in this page completed (Total: {totalCount})
           </Typography>
         </Box>
         <Button
@@ -143,22 +154,24 @@ function TasksPageContent() {
         </Alert>
       )}
 
-      <Box sx={{ mb: 2, p: 2, backgroundColor: 'background.paper', borderRadius: 1 }}>
-        <Box sx={{ width: '100%', backgroundColor: 'grey.300', borderRadius: 1, height: 10 }}>
-          <Box
-            sx={{
-              width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`,
-              backgroundColor: 'success.main',
-              height: '100%',
-              borderRadius: 1,
-              transition: 'width 0.3s ease',
-            }}
-          />
+      {totalCount > 0 && (
+        <Box sx={{ mb: 2, p: 2, backgroundColor: 'background.paper', borderRadius: 1 }}>
+          <Box sx={{ width: '100%', backgroundColor: 'grey.300', borderRadius: 1, height: 10 }}>
+            <Box
+              sx={{
+                width: `${pageTaskCount > 0 ? (completedCount / pageTaskCount) * 100 : 0}%`,
+                backgroundColor: 'success.main',
+                height: '100%',
+                borderRadius: 1,
+                transition: 'width 0.3s ease',
+              }}
+            />
+          </Box>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Page Progress: {pageTaskCount > 0 ? Math.round((completedCount / pageTaskCount) * 100) : 0}%
+          </Typography>
         </Box>
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          Progress: {totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%
-        </Typography>
-      </Box>
+      )}
 
       <TableContainer component={Paper}>
         <Table>
@@ -233,6 +246,13 @@ function TasksPageContent() {
         </Box>
       )}
 
+      <CustomPagination
+        totalItems={totalCount}
+        pageSize={PAGE_SIZE}
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+      />
+
       <AddTaskModal
         open={openModal}
         onClose={handleCloseModal}
@@ -248,5 +268,5 @@ export default function TasksPage() {
     <ProtectedLayout>
       <TasksPageContent />
     </ProtectedLayout>
-  )
+  );
 }
