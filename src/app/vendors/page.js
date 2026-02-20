@@ -118,7 +118,7 @@ function VendorsPageContent() {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenModal()}
-          sx={{ backgroundColor: 'primary.main' }}
+          color="primary"
         >
           Add Vendor
         </Button>
