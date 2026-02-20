@@ -1,12 +1,11 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { setLogoutCallback } from '@/utils/api';
-import { User } from '@/types';
+import { setLogoutCallback, apiGet } from '@/utils/api';
+import { User, ApiResponse } from '@/types';
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (userData: any) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
@@ -22,21 +21,27 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('access_token');
-    const storedUser = localStorage.getItem('user');
+    const checkAuthStatus = async () => {
+      setLoading(true);
+      try {
+        const res = await apiGet<User>('/api/v1/auth/profile/');
+        if (res.success && res.data) {
+          setUser(res.data);
+        }
+      } catch (err) {
+        // Not authenticated
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-
-    setLoading(false);
+    checkAuthStatus();
   }, []);
 
   const handleAuthResponse = async (response: Response) => {
@@ -46,16 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(result.message || 'Authentication operation failed');
     }
 
-    const accessToken = result.data.tokens.access;
-    const refreshToken = result.data.tokens.refresh;
     const userData = result.data.user;
-
-    setToken(accessToken);
     setUser(userData);
-
-    localStorage.setItem('access_token', accessToken);
-    if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('user', JSON.stringify(userData));
 
     return { success: true };
   };
@@ -70,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }),
+        credentials: 'include'
       });
 
       return await handleAuthResponse(response);
@@ -89,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
+        credentials: 'include'
       });
 
       return await handleAuthResponse(response);
@@ -98,12 +97,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
-    setToken(null);
+  const logout = async () => {
+    if (API_URL) {
+      try {
+        await fetch(`${API_URL}/api/v1/auth/logout/`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+      } catch (e) {
+        console.error("Server logout failed", e);
+      }
+    }
     setUser(null);
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
   };
 
   useEffect(() => {
@@ -112,12 +117,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     user,
-    token,
     login,
     register,
     logout,
     loading,
-    isAuthenticated: !!(user && token),
+    isAuthenticated: !!user,
   };
 
   return (
