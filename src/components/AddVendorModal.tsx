@@ -14,35 +14,52 @@ import {
   Alert,
 } from '@mui/material';
 
-const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    due_date: '',
-    priority: 'normal',
+import { Vendor } from '@/types';
+
+interface AddVendorModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  vendor: Vendor | null;
+}
+
+const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProps) => {
+  const [formData, setFormData] = useState<Partial<Vendor>>({
+    name: '',
+    category: '',
+    email: '',
+    phone: '',
+    quote_price: '',
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const categories = [
+    'Catering',
+    'Photography',
+    'Venue',
+    'Decoration',
+    'Music/DJ',
+    'Flowers',
+    'Cake',
+    'Other',
+  ];
+
   useEffect(() => {
-    if (task) {
-      setFormData({
-        title: task.title,
-        description: task.description || '',
-        due_date: task.due_date.split('T')[0],
-        priority: task.priority || 'normal',
-      });
+    if (vendor) {
+      setFormData(vendor);
     } else {
       setFormData({
-        title: '',
-        description: '',
-        due_date: '',
-        priority: 'normal',
+        name: '',
+        category: '',
+        email: '',
+        phone: '',
+        quote_price: '',
       });
     }
-  }, [task, open]);
+  }, [vendor, open]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -50,7 +67,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -58,13 +75,13 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      if (!formData.title || !formData.due_date) {
-        throw new Error('Title and Due Date are required');
+      if (!formData.name || !formData.category || !formData.email) {
+        throw new Error('Name, Category, and Email are required');
       }
 
       let response;
-      if (task) {
-        response = await fetch(`${apiUrl}/api/v1/tasks/${task.id}/update/`, {
+      if (vendor) {
+        response = await fetch(`${apiUrl}/api/v1/vendors/${vendor.id}/update/`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -72,7 +89,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
           body: JSON.stringify(formData),
         });
       } else {
-        response = await fetch(`${apiUrl}/api/v1/tasks/`, {
+        response = await fetch(`${apiUrl}/api/v1/vendors/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -82,11 +99,11 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
       }
 
       if (!response.ok) {
-        throw new Error(task ? 'Failed to update task' : 'Failed to add task');
+        throw new Error(vendor ? 'Failed to update vendor' : 'Failed to add vendor');
       }
 
       onSuccess();
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -111,7 +128,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
         }}
       >
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-          {task ? 'Edit Task' : 'Add New Task'}
+          {vendor ? 'Edit Vendor' : 'Add New Vendor'}
         </Typography>
 
         {error && (
@@ -123,50 +140,59 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            label="Task Title"
-            name="title"
-            value={formData.title}
+            label="Vendor Name"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
             margin="normal"
             required
           />
 
-          <TextField
-            fullWidth
-            label="Description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            margin="normal"
-            multiline
-            rows={3}
-          />
-
-          <TextField
-            fullWidth
-            label="Due Date"
-            name="due_date"
-            type="date"
-            value={formData.due_date}
-            onChange={handleChange}
-            margin="normal"
-            required
-            InputLabelProps={{ shrink: true }}
-          />
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Priority</InputLabel>
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel>Category</InputLabel>
             <Select
-              name="priority"
-              value={formData.priority}
+              name="category"
+              value={formData.category}
               onChange={handleChange}
-              label="Priority"
+              label="Category"
             >
-              <MenuItem value="low">Low</MenuItem>
-              <MenuItem value="normal">Normal</MenuItem>
-              <MenuItem value="high">High</MenuItem>
+              {categories.map((cat) => (
+                <MenuItem key={cat} value={cat}>
+                  {cat}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
+
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+
+          <TextField
+            fullWidth
+            label="Phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            margin="normal"
+          />
+
+          <TextField
+            fullWidth
+            label="Quote Price"
+            name="quote_price"
+            type="number"
+            value={formData.quote_price}
+            onChange={handleChange}
+            margin="normal"
+          />
 
           <Box sx={{ mt: 3, display: 'flex', gap: 1 }}>
             <Button
@@ -176,7 +202,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
               disabled={loading}
               sx={{ backgroundColor: '#1976d2' }}
             >
-              {loading ? 'Saving...' : task ? 'Update Task' : 'Add Task'}
+              {loading ? 'Saving...' : vendor ? 'Update Vendor' : 'Add Vendor'}
             </Button>
             <Button variant="outlined" fullWidth onClick={onClose}>
               Cancel
@@ -188,4 +214,4 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }) => {
   );
 };
 
-export default AddTaskModal;
+export default AddVendorModal;

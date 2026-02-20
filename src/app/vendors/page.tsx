@@ -27,13 +27,14 @@ import {
 import AddVendorModal from '@/components/AddVendorModal';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet, apiDelete } from '@/utils/api';
+import { Vendor } from '@/types';
 
 function VendorsPageContent() {
-  const [vendors, setVendors] = useState([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
-  const [editingVendor, setEditingVendor] = useState(null);
+  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -52,14 +53,14 @@ function VendorsPageContent() {
       } else {
         setError(result.error || result.message || 'Failed to fetch vendors');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteVendor = async (vendorId) => {
+  const handleDeleteVendor = async (vendorId: number) => {
     if (!window.confirm('Are you sure you want to delete this vendor?')) {
       return;
     }
@@ -72,12 +73,12 @@ function VendorsPageContent() {
       } else {
         setError(result.error || result.message || 'Failed to delete vendor');
       }
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
     }
   };
 
-  const handleOpenModal = (vendor = null) => {
+  const handleOpenModal = (vendor: Vendor | null = null) => {
     setEditingVendor(vendor);
     setOpenModal(true);
   };

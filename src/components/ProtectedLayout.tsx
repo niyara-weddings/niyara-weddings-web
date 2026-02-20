@@ -36,12 +36,12 @@ import Link from 'next/link';
 
 const drawerWidth = 260;
 
-export default function ProtectedLayout({ children }) {
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { user, logout, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -69,7 +69,7 @@ export default function ProtectedLayout({ children }) {
     setMobileOpen(!mobileOpen);
   };
 
-  const handleMenu = (event) => {
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -92,14 +92,14 @@ export default function ProtectedLayout({ children }) {
 
   const drawer = (
     <Box>
-      <Toolbar sx={{ 
+      <Toolbar sx={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         py: 2
       }}>
         <Link href="/dashboard" passHref style={{ textDecoration: 'none' }}>
-          <Typography variant="h6" component="div" sx={{ 
+          <Typography variant="h6" component="div" sx={{
             color: 'primary.main',
             fontWeight: 'bold',
             fontSize: '1.5rem'
@@ -114,7 +114,7 @@ export default function ProtectedLayout({ children }) {
           <Link href={item.path} passHref key={item.text} style={{ textDecoration: 'none', color: 'inherit' }}>
             <ListItem disablePadding>
               <ListItemButton
-                onClick={mobileOpen ? handleDrawerToggle : null} // Conditional onClick
+                onClick={mobileOpen ? handleDrawerToggle : undefined} // Conditional onClick
                 selected={pathname === item.path}
                 sx={{
                   py: 1.5,
@@ -132,7 +132,7 @@ export default function ProtectedLayout({ children }) {
                   },
                 }}
               >
-                <ListItemIcon sx={{ 
+                <ListItemIcon sx={{
                   color: pathname === item.path ? 'primary.main' : 'inherit',
                   minWidth: 40
                 }}>
@@ -225,8 +225,8 @@ export default function ProtectedLayout({ children }) {
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
               width: drawerWidth,
             },
           }}
@@ -238,8 +238,8 @@ export default function ProtectedLayout({ children }) {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
               width: drawerWidth,
             },
           }}

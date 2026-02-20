@@ -1,21 +1,19 @@
-'use client';
 import React from 'react';
 import './globals.css';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import theme from '@/styles/theme';
-import { AuthProvider } from '@/context/AuthContext';
+import Providers from '@/components/Providers';
+
+export const metadata = {
+  title: "Wedding Planner",
+  description: "Plan your perfect wedding",
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            {children}
-          </ThemeProvider>
-        </AuthProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

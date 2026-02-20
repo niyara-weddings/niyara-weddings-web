@@ -14,25 +14,34 @@ import {
   Alert,
 } from '@mui/material';
 
-const AddGuestModal = ({ open, onClose, onSuccess, guest }) => {
-  const [formData, setFormData] = useState({
+import { Guest } from '@/types';
+
+interface AddGuestModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  guest: Guest | null;
+}
+
+const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) => {
+  const [formData, setFormData] = useState<Partial<Guest>>({
     name: '',
     email: '',
     phone: '',
-    rsvp_status: 'pending',
+    rsvp_status: 'invited',
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (guest) {
       setFormData(guest);
     } else {
-      setFormData({ name: '', email: '', phone: '', rsvp_status: 'pending' });
+      setFormData({ name: '', email: '', phone: '', rsvp_status: 'invited' });
     }
   }, [guest, open]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -40,7 +49,7 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -78,7 +87,7 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }) => {
       }
 
       onSuccess();
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);

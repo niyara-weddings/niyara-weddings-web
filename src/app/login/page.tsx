@@ -26,16 +26,22 @@ export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.username.trim() || !formData.password.trim()) {
+      setError('Username and password are required');
+      return;
+    }
+
     setLoading(true);
 
     const result = await login(formData.username, formData.password);
