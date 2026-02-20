@@ -19,6 +19,7 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Button,
   CircularProgress,
 } from '@mui/material';
 import {
@@ -32,6 +33,7 @@ import {
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { getMediaUrl } from '@/utils/api';
 import Link from 'next/link';
 
 const drawerWidth = 260;
@@ -170,22 +172,49 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {menuItems.find((item) => item.path === pathname)?.text || 'Dashboard'}
-          </Typography>
-          <div>
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Button
+              color="inherit"
+              size="small"
+              startIcon={<LogoutIcon />}
+              onClick={handleLogout}
+              sx={{
+                borderRadius: 2,
+                fontWeight: 500,
+                textTransform: 'none',
+                opacity: 0.8,
+                '&:hover': {
+                  opacity: 1,
+                  bgcolor: 'rgba(0,0,0,0.04)'
+                },
+                display: { xs: 'none', sm: 'flex' }
+              }}
+            >
+              Logout
+            </Button>
             <IconButton
               size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
+              aria-label="view profile"
+              onClick={() => router.push('/profile')}
               color="inherit"
+              sx={{ p: 0 }}
             >
-              <Avatar sx={{ bgcolor: 'secondary.main' }}>
+              <Avatar
+                src={user?.profile_image ? getMediaUrl(user.profile_image) : undefined}
+                sx={{
+                  width: 48,
+                  height: 48,
+                  bgcolor: user?.profile_image ? 'transparent' : 'primary.main',
+                  border: '2px solid',
+                  borderColor: 'primary.main'
+                }}
+              >
                 {user?.first_name?.[0] || user?.email?.[0] || 'U'}
               </Avatar>
             </IconButton>
+          </Box>
+          <div>
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}

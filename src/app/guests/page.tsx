@@ -23,6 +23,7 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import AddGuestModal from '@/components/AddGuestModal';
+import CustomPagination from '@/components/CustomPagination';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet, apiDelete } from '@/utils/api';
 import { Guest } from '@/types';
@@ -34,21 +35,31 @@ export default function GuestsPage() {
   const [openModal, setOpenModal] = useState(false);
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     fetchGuests();
-  }, [refreshKey]);
+  }, [refreshKey, page]);
 
   const fetchGuests = async () => {
     try {
       setLoading(true);
-      const result = await apiGet('/api/v1/guests/list/');
+      const result = await apiGet(`/api/v1/guests/list/?page=${page}`);
 
       if (result.success) {
-        setGuests(result.data);
+        // Handle both paginated and non-paginated responses for safety
+        if (result.data && result.data.results) {
+          setGuests(result.data.results);
+          setTotalCount(result.data.count);
+        } else {
+          setGuests(result.data);
+          setTotalCount(result.data.length);
+        }
         setError(null);
       } else {
-        setError(result.error || 'Failed to fetch guests');
+        setError(result.message || 'Failed to fetch guests');
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
@@ -192,6 +203,13 @@ export default function GuestsPage() {
             </Typography>
           </Box>
         )}
+
+        <CustomPagination
+          totalItems={totalCount}
+          pageSize={PAGE_SIZE}
+          currentPage={page}
+          onPageChange={(newPage) => setPage(newPage)}
+        />
 
         <AddGuestModal
           open={openModal}
