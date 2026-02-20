@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { setLogoutCallback } from '@/utils/api';
-import { User } from '@/types';
+import { setLogoutCallback, apiGet } from '@/utils/api';
+import { User, ApiResponse } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -26,13 +26,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const checkAuthStatus = async () => {
+      setLoading(true);
+      try {
+        const res = await apiGet<User>('/api/v1/auth/profile/');
+        if (res.success && res.data) {
+          setUser(res.data);
+        }
+      } catch (err) {
+        // Not authenticated
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-
-    setLoading(false);
+    checkAuthStatus();
   }, []);
 
   const handleAuthResponse = async (response: Response) => {
@@ -44,7 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const userData = result.data.user;
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
 
     return { success: true };
   };
@@ -101,7 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     setUser(null);
-    localStorage.removeItem('user');
   };
 
   useEffect(() => {
