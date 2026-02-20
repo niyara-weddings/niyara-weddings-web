@@ -48,62 +48,44 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
 }
 
 async function fetchWithInterceptor(endpoint: string, options: RequestInit = {}): Promise<Response> {
-  const token = localStorage.getItem('access_token');
   const headers = new Headers(options.headers || {});
+  options.credentials = 'include';
 
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
   if (!headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
   let response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
 
-  if (response.status === 401 && token) {
-    const refreshToken = localStorage.getItem('refresh_token');
-
-    if (refreshToken) {
-      if (!isRefreshing) {
-        isRefreshing = true;
-        try {
-          const refreshRes = await fetch(`${BASE_URL}/api/v1/auth/token/refresh/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refresh: refreshToken })
-          });
-
-          if (refreshRes.ok) {
-            const refreshData = await refreshRes.json();
-            const newAccessToken = refreshData.data?.tokens?.access || refreshData.access;
-            if (newAccessToken) {
-              localStorage.setItem('access_token', newAccessToken);
-              onRefreshed(newAccessToken);
-              // Retry original request
-              headers.set('Authorization', `Bearer ${newAccessToken}`);
-              response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
-            } else {
-              throw new Error("Invalid token refresh response");
-            }
-          } else {
-            throw new Error("Token refresh rejected");
-          }
-        } catch {
-          if (_logoutCallback) _logoutCallback();
-        } finally {
-          isRefreshing = false;
-        }
-      } else {
-        // Wait for the token to be refreshed
-        return new Promise<Response>((resolve) => {
-          subscribeTokenRefresh((newAccessToken) => {
-            headers.set('Authorization', `Bearer ${newAccessToken}`);
-            fetch(`${BASE_URL}${endpoint}`, { ...options, headers }).then(resolve);
-          });
+  if (response.status === 401) {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      try {
+        const refreshRes = await fetch(`${BASE_URL}/api/v1/auth/token/refresh/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
         });
+
+        if (refreshRes.ok) {
+          onRefreshed("token_refreshed");
+          // Retry original request, browser automatically routes Set-Cookie headers
+          response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+        } else {
+          throw new Error("Token refresh rejected");
+        }
+      } catch {
+        if (_logoutCallback) _logoutCallback();
+      } finally {
+        isRefreshing = false;
       }
-    } else if (_logoutCallback) {
-      _logoutCallback();
+    } else {
+      // Wait for the token to be refreshed
+      return new Promise<Response>((resolve) => {
+        subscribeTokenRefresh(() => {
+          fetch(`${BASE_URL}${endpoint}`, { ...options, headers }).then(resolve);
+        });
+      });
     }
   }
 
