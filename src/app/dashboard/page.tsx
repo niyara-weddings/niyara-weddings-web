@@ -59,7 +59,7 @@ function Dashboard() {
       const vendorsResponse = await apiGet('/api/v1/vendors/list/');
       const tasksResponse = await apiGet('/api/v1/tasks/list/');
 
-      if (!guestsResponse.success || !vendorsResponse.success || !tasksResponse.success) {
+      if (!(guestsResponse as { success?: boolean }).success || !(vendorsResponse as { success?: boolean }).success || !(tasksResponse as { success?: boolean }).success) {
         throw new Error('Failed to fetch dashboard data');
       }
 
