@@ -91,26 +91,13 @@ export default function LandingPage() {
               width: '100%',
               height: '400px',
               borderRadius: '24px',
-              background: 'url(/niyara-logo-white.png) no-repeat center center',
+              background: 'url(/niyara_logo_gold_charcoal.png) no-repeat center center',
               backgroundSize: 'contain',
               animation: `${fadeIn} 1.5s ease-out`
             }} />
           </Grid>
         </Grid>
       </Container>
-      <Box
-        component="footer"
-        sx={{
-          mt: 'auto',
-          py: 3,
-          textAlign: 'center',
-          color: 'rgba(255,255,255,0.5)',
-        }}
-      >
-        <Typography variant="body2">
-          © {new Date().getFullYear()} Niyara Weddings. All rights reserved.
-        </Typography>
-      </Box>
     </HeroSection>
   );
 }
