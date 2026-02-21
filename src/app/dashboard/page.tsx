@@ -63,9 +63,9 @@ function Dashboard() {
         throw new Error('Failed to fetch dashboard data');
       }
 
-      const guests = guestsResponse.data;
-      const vendors = vendorsResponse.data;
-      const tasks = tasksResponse.data;
+      const guests = (guestsResponse as { data: any[] }).data;
+      const vendors = (vendorsResponse as { data: any[] }).data;
+      const tasks = (tasksResponse as { data: any[] }).data;
 
       const rsvpd = guests.filter((g: { rsvp_status: string }) => g.rsvp_status === 'confirmed').length;
       const remaining = tasks.filter((t: { is_completed: boolean }) => !t.is_completed).length;
