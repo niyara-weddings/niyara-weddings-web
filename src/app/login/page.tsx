@@ -81,9 +81,13 @@ export default function LoginPage() {
               mb: 3,
             }}
           >
-            <Typography component="h1" variant="h4" gutterBottom color="primary">
-              Wedding Planner
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <img
+                src="/niyara-logo-main.jpg"
+                alt="Niyara Weddings"
+                style={{ height: '50px', objectFit: 'contain' }}
+              />
+            </Box>
             <Typography variant="h5" sx={{ mb: 3 }}>
               Sign in
             </Typography>
@@ -146,6 +150,19 @@ export default function LoginPage() {
             </Box>
           </Box>
         </Paper>
+      </Box>
+      <Box
+        component="footer"
+        sx={{
+          mt: 8,
+          py: 3,
+          textAlign: 'center',
+          color: 'text.secondary',
+        }}
+      >
+        <Typography variant="body2">
+          © {new Date().getFullYear()} Niyara Weddings. All rights reserved.
+        </Typography>
       </Box>
     </Container>
   );

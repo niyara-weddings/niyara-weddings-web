@@ -49,7 +49,13 @@ const StatCard = ({ title, count, icon, color }: { title: string; count: number 
 );
 
 function Dashboard() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalGuests: number | null;
+    guestRSVPd: number | null;
+    totalVendors: number | null;
+    remainingTasks: number | null;
+    completedTasks: number | null;
+  }>({
     totalGuests: null,
     guestRSVPd: null,
     totalVendors: null,
