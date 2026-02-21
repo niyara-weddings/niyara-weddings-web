@@ -35,14 +35,15 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
   const [loading, setLoading] = useState(false);
 
   const categories = [
-    'Catering',
-    'Photography',
-    'Venue',
-    'Decoration',
-    'Music/DJ',
-    'Flowers',
-    'Cake',
-    'Other',
+    { label: 'Catering', value: 'catering' },
+    { label: 'Photography', value: 'photography' },
+    { label: 'Videography', value: 'videography' },
+    { label: 'Venue', value: 'venue' },
+    { label: 'Decorations', value: 'decorations' },
+    { label: 'Music/DJ', value: 'music_dj' },
+    { label: 'Flowers', value: 'flowers' },
+    { label: 'Cake', value: 'cake' },
+    { label: 'Other', value: 'other' },
   ];
 
   useEffect(() => {
@@ -87,6 +88,7 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
+          credentials: 'include',
         });
       } else {
         response = await fetch(`${apiUrl}/api/v1/vendors/`, {
@@ -95,6 +97,7 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
+          credentials: 'include',
         });
       }
 
@@ -111,7 +114,15 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
+      disableRestoreFocus
+    >
       <Box
         sx={{
           position: 'absolute',
@@ -157,8 +168,8 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
               label="Category"
             >
               {categories.map((cat) => (
-                <MenuItem key={cat} value={cat}>
-                  {cat}
+                <MenuItem key={cat.value} value={cat.value}>
+                  {cat.label}
                 </MenuItem>
               ))}
             </Select>
@@ -200,7 +211,7 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ backgroundColor: '#1976d2' }}
+              sx={{ backgroundColor: '#d4af37', color: '#1a1a1a', '&:hover': { backgroundColor: '#b8962e' } }}
             >
               {loading ? 'Saving...' : vendor ? 'Update Vendor' : 'Add Vendor'}
             </Button>

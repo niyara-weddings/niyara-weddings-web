@@ -10,11 +10,20 @@ import {
   Box,
   CircularProgress,
   Alert,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Chip,
 } from '@mui/material';
 import {
   People as PeopleIcon,
   Business as BusinessIcon,
   Task as TaskIcon,
+  CheckCircle as CheckCircleIcon,
+  CalendarMonth as CalendarIcon,
+  AccountBalanceWallet as BudgetIcon,
 } from '@mui/icons-material';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet } from '@/utils/api';
@@ -45,7 +54,9 @@ function Dashboard() {
     guestRSVPd: null,
     totalVendors: null,
     remainingTasks: null,
+    completedTasks: null,
   });
+  const [progress, setProgress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,27 +66,37 @@ function Dashboard() {
 
   const fetchStats = async () => {
     try {
-      const guestsResponse = await apiGet('/api/v1/guests/list/');
-      const vendorsResponse = await apiGet('/api/v1/vendors/list/');
-      const tasksResponse = await apiGet('/api/v1/tasks/list/');
+      const [guestsRes, vendorsRes, tasksRes, progressRes] = await Promise.all([
+        apiGet('/api/v1/guests/list/'),
+        apiGet('/api/v1/vendors/list/'),
+        apiGet('/api/v1/tasks/list/'),
+        apiGet('/api/v1/profiles/progress/')
+      ]);
 
-      if (!guestsResponse.success || !vendorsResponse.success || !tasksResponse.success) {
+      if (!guestsRes.success || !vendorsRes.success || !tasksRes.success) {
         throw new Error('Failed to fetch dashboard data');
       }
 
-      const guests = guestsResponse.data;
-      const vendors = vendorsResponse.data;
-      const tasks = tasksResponse.data;
+      const guests = guestsRes.data;
+      const vendors = vendorsRes.data;
+      const tasks = tasksRes.data;
 
       const rsvpd = guests.filter((g: { rsvp_status: string }) => g.rsvp_status === 'confirmed').length;
-      const remaining = tasks.filter((t: { is_completed: boolean }) => !t.is_completed).length;
+      const completed = tasks.filter((t: { is_completed: boolean }) => t.is_completed).length;
+      const remaining = tasks.length - completed;
 
       setStats({
         totalGuests: guests.length,
         guestRSVPd: rsvpd,
         totalVendors: vendors.length,
         remainingTasks: remaining,
+        completedTasks: completed,
       });
+
+      if (progressRes.success) {
+        setProgress(progressRes.data);
+      }
+      
       setLoading(false);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
@@ -85,10 +106,10 @@ function Dashboard() {
   };
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
-          Wedding Planning Dashboard
+    <Container maxWidth="lg" sx={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 100px)' }}>
+      <Box sx={{ my: 4, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+        <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
+          The Planning Storyboard
         </Typography>
 
         {error && (
@@ -102,45 +123,184 @@ function Dashboard() {
             <CircularProgress />
           </Box>
         ) : (
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                title="Total Guests"
-                count={stats.totalGuests}
-                icon={<PeopleIcon />}
-                color="primary.main"
-              />
+          <>
+            {/* Top Row: Quick Stats (Full Width) */}
+            <Grid container spacing={2} sx={{ mb: 4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+                <StatCard
+                  title="Total Guests"
+                  count={stats.totalGuests}
+                  icon={<PeopleIcon />}
+                  color="primary.main"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+                <StatCard
+                  title="RSVPs Accepted"
+                  count={stats.guestRSVPd}
+                  icon={<PeopleIcon />}
+                  color="info.main"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+                <StatCard
+                  title="Total Vendors"
+                  count={stats.totalVendors}
+                  icon={<BusinessIcon />}
+                  color="error.main"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+                <StatCard
+                  title="Remaining Tasks"
+                  count={stats.remainingTasks}
+                  icon={<TaskIcon />}
+                  color="warning.main"
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+                <StatCard
+                  title="Tasks Completed"
+                  count={stats.completedTasks}
+                  icon={<TaskIcon />}
+                  color="success.main"
+                />
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                title="RSVPs Accepted"
-                count={stats.guestRSVPd}
-                icon={<PeopleIcon />}
-                color="success.main"
-              />
+
+            {/* Bottom Row: Intelligence Cards (Equal Height) */}
+            <Grid container spacing={3} alignItems="stretch">
+              {/* Left Column: Dynamic Milestones */}
+              <Grid size={{ xs: 12, md: 8 }} sx={{ display: 'flex' }}>
+                <Card sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
+                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                        Next Milestones
+                      </Typography>
+                    </Box>
+                    <Divider sx={{ mb: 2 }} />
+                    {progress?.next_milestones?.length > 0 ? (
+                      <List>
+                        {progress.next_milestones.map((milestone: string, index: number) => (
+                          <ListItem key={index} sx={{ px: 0 }}>
+                            <ListItemIcon sx={{ minWidth: 40 }}>
+                              <CheckCircleIcon color="success" />
+                            </ListItemIcon>
+                            <ListItemText 
+                              primary={milestone} 
+                              primaryTypographyProps={{ fontWeight: 500 }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    ) : (
+                      <Typography color="textSecondary" sx={{ py: 2, textAlign: 'center' }}>
+                        No immediate milestones. Relax and have some chai! ☕️
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Right Column: Readiness Score */}
+              <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
+                <Card sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+                  <CardContent sx={{ textAlign: 'center', width: '100%', flexGrow: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      Wedding Readiness
+                    </Typography>
+                    
+                    {/* USP Badge: Planning Phase */}
+                    <Box sx={{ mb: 3 }}>
+                      <Chip 
+                        label={progress?.overall_progress > 70 ? "Final Stretch" : progress?.overall_progress > 30 ? "Selection Phase" : "Research Phase"} 
+                        color="secondary" 
+                        size="small" 
+                        sx={{ fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}
+                      />
+                    </Box>
+
+                    <Box sx={{ position: 'relative', display: 'inline-flex', mb: 3 }}>
+                      <CircularProgress
+                        variant="determinate"
+                        value={100}
+                        size={160}
+                        thickness={4}
+                        sx={{ color: 'grey.200' }}
+                      />
+                      <CircularProgress
+                        variant="determinate"
+                        value={progress?.overall_progress || 0}
+                        size={160}
+                        thickness={4}
+                        sx={{
+                          color: 'primary.main',
+                          position: 'absolute',
+                          left: 0,
+                          transition: 'all 0.5s ease'
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Typography variant="h3" component="div" color="text.primary" sx={{ fontWeight: 'bold' }}>
+                          {`${progress?.overall_progress || 0}%`}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 4, px: 2 }}>
+                      Weighted score: {progress?.overall_progress > 50 ? "You're on top of things!" : "Time to dive in."}
+                    </Typography>
+
+                    <Divider sx={{ mb: 3 }} />
+
+                    <Box sx={{ px: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="body2" fontWeight="bold">Budget Pulse</Typography>
+                        <Typography variant="body2">
+                          KES {Math.round(progress?.budget_used || 0).toLocaleString()}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ width: '100%', bgcolor: 'grey.200', borderRadius: 1, height: 8, mb: 2 }}>
+                        <Box 
+                          sx={{ 
+                            width: `${progress?.total_budget ? (progress.budget_used / progress.total_budget) * 100 : 0}%`, 
+                            bgcolor: 'secondary.main', 
+                            height: '100%', 
+                            borderRadius: 1 
+                          }} 
+                        />
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="textSecondary">Countdown</Typography>
+                        <Typography variant="body2" fontWeight="bold" color="primary.main">
+                          {progress?.days_remaining || 0} Days to go
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                title="Total Vendors"
-                count={stats.totalVendors}
-                icon={<BusinessIcon />}
-                color="error.main"
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                title="Remaining Tasks"
-                count={stats.remainingTasks}
-                icon={<TaskIcon />}
-                color="warning.main"
-              />
-            </Grid>
-          </Grid>
+          </>
         )}
 
-        <Box sx={{ mt: 4, p: 3, backgroundColor: 'background.default', borderRadius: 1 }}>
-          <Typography variant="body1" color="text.secondary">
-            Your dashboard is ready! Now let&apos;s start clicking around the sidebar before your partner realizes you haven&apos;t planned a single thing. 💍😅
+        <Box sx={{ mt: 'auto', pb: 4, textAlign: 'center', borderTop: '1px solid', borderColor: 'grey.100', pt: 4 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', letterSpacing: 0.5, opacity: 0.8 }}>
+            "Your dashboard is live! Take a deep breath and start clicking—before the in-laws start calling." 💍✨
           </Typography>
         </Box>
       </Box>

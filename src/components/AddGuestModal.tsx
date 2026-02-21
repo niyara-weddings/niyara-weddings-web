@@ -57,8 +57,8 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      if (!formData.name || !formData.email) {
-        throw new Error('Name and Email are required');
+      if (!formData.name) {
+        throw new Error('Guest name is required');
       }
 
       let response;
@@ -70,6 +70,7 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
+          credentials: 'include',
         });
       } else {
         // Create new guest
@@ -79,6 +80,7 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
+          credentials: 'include',
         });
       }
 
@@ -95,7 +97,15 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal
+      open={open}
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
+      disableRestoreFocus
+    >
       <Box
         sx={{
           position: 'absolute',
@@ -132,13 +142,12 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
 
           <TextField
             fullWidth
-            label="Email"
+            label="Email (Optional)"
             name="email"
             type="email"
             value={formData.email}
             onChange={handleChange}
             margin="normal"
-            required
           />
 
           <TextField
@@ -158,9 +167,10 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
               onChange={handleChange}
               label="RSVP Status"
             >
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="accepted">Accepted</MenuItem>
+              <MenuItem value="invited">Invited</MenuItem>
+              <MenuItem value="confirmed">Confirmed</MenuItem>
               <MenuItem value="declined">Declined</MenuItem>
+              <MenuItem value="maybe">Maybe</MenuItem>
             </Select>
           </FormControl>
 
@@ -170,7 +180,7 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ backgroundColor: '#1976d2' }}
+              sx={{ backgroundColor: '#d4af37', color: '#1a1a1a', '&:hover': { backgroundColor: '#b8962e' } }}
             >
               {loading ? 'Saving...' : guest ? 'Update Guest' : 'Add Guest'}
             </Button>

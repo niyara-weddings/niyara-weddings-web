@@ -26,7 +26,7 @@ import {
 import AddTaskModal from '@/components/AddTaskModal';
 import CustomPagination from '@/components/CustomPagination';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import { apiGet, apiPost, apiDelete } from '@/utils/api';
+import { apiGet, apiPost, apiDelete, apiPatch } from '@/utils/api';
 import { Task } from '@/types';
 
 function TasksPageContent() {
@@ -70,7 +70,7 @@ function TasksPageContent() {
 
   const handleToggleTask = async (taskId: number, completed: boolean) => {
     try {
-      const result = await apiPost(`/api/v1/tasks/${taskId}/toggle/`, { completed: !completed });
+      const result = await apiPatch(`/api/v1/tasks/${taskId}/toggle/`, { completed: !completed });
 
       if (result.success) {
         setRefreshKey((prev) => prev + 1);

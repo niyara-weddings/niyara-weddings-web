@@ -28,7 +28,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
     title: '',
     description: '',
     due_date: '',
-    priority: 'normal' as any,
+    priority: 'medium' as any,
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,14 +39,14 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
         title: task.title,
         description: task.description || '',
         due_date: task.due_date ? task.due_date.split('T')[0] : '',
-        priority: task.priority || ('normal' as any),
+        priority: task.priority || ('medium' as any),
       });
     } else {
       setFormData({
         title: '',
         description: '',
         due_date: '',
-        priority: 'normal' as any,
+        priority: 'medium' as any,
       });
     }
   }, [task, open]);
@@ -79,6 +79,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
+          credentials: 'include',
         });
       } else {
         response = await fetch(`${apiUrl}/api/v1/tasks/`, {
@@ -87,6 +88,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
+          credentials: 'include',
         });
       }
 
@@ -103,7 +105,15 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal 
+      open={open} 
+      onClose={(event, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
+      disableRestoreFocus
+    >
       <Box
         sx={{
           position: 'absolute',
@@ -172,7 +182,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
               label="Priority"
             >
               <MenuItem value="low">Low</MenuItem>
-              <MenuItem value="normal">Normal</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
               <MenuItem value="high">High</MenuItem>
             </Select>
           </FormControl>
