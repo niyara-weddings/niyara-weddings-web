@@ -165,7 +165,7 @@ function VendorsPageContent() {
                 <TableCell>{vendor.category}</TableCell>
                 <TableCell>{vendor.email}</TableCell>
                 <TableCell>{vendor.phone || 'N/A'}</TableCell>
-                <TableCell>${vendor.quote_price || '0'}</TableCell>
+                <TableCell>KES {Math.round(Number(vendor.quote_price) || 0).toLocaleString()}</TableCell>
                 <TableCell>
                   <Button
                     size="small"
