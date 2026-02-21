@@ -285,6 +285,8 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           backgroundColor: 'background.default',
           minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         <Toolbar /> {/* This empty Toolbar provides spacing below AppBar */}
