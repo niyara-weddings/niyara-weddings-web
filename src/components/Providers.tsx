@@ -1,18 +1,16 @@
 'use client';
 
-import React from 'react';
-import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from '@/styles/theme';
+import { ThemeContextProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <AuthProvider>
-            <ThemeProvider theme={theme}>
+            <ThemeContextProvider>
                 <CssBaseline />
                 {children}
-            </ThemeProvider>
+            </ThemeContextProvider>
         </AuthProvider>
     );
 }

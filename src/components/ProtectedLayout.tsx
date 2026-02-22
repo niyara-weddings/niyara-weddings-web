@@ -35,15 +35,23 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getMediaUrl } from '@/utils/api';
 import Link from 'next/link';
+import PublicHeader from '@/components/PublicHeader';
+import PublicFooter from '@/components/PublicFooter';
 
 const drawerWidth = 260;
+
+const StreamIcon = (props: any) => (
+  <svg width="24" height="24" viewBox="0 0 512 512" fill="currentColor" {...props}>
+    <path d="M16 128h416c8.84 0 16-7.16 16-16V48c0-8.84-7.16-16-16-16H16C7.16 32 0 39.16 0 48v64c0 8.84 7.16 16 16 16zm480 80H80c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16zm-64 176H16c-8.84 0-16 7.16-16 16v64c0 8.84 7.16 16 16 16h416c8.84 0 16-7.16 16-16v-64c0-8.84-7.16-16-16-16z" />
+  </svg>
+);
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { user, logout, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [desktopOpen, setDesktopOpen] = useState(true);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -53,245 +61,165 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   if (loading || !isAuthenticated) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          width: '100vw',
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw' }}>
         <CircularProgress />
       </Box>
     );
   }
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    handleClose();
-    logout();
-  };
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleDesktopDrawerToggle = () => setDesktopOpen(!desktopOpen);
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Guests', icon: <PeopleIcon />, path: '/guests' },
+    { text: 'Guest Manager', icon: <PeopleIcon />, path: '/guests' },
     { text: 'Vendors', icon: <StoreIcon />, path: '/vendors' },
-    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
-    { text: 'Profile', icon: <ProfileIcon />, path: '/profile' },
+    { text: 'Action Plan', icon: <TaskIcon />, path: '/tasks' },
+    { text: 'Wedding Canvas', icon: <ProfileIcon />, path: '/profile' },
   ];
 
   const drawer = (
-    <Box>
-      <Toolbar sx={{
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        py: 2
+        justifyContent: desktopOpen ? 'flex-end' : 'center',
+        p: 2,
+        minHeight: 64
       }}>
-        <Link href="/dashboard" passHref style={{ textDecoration: 'none' }}>
-          <Typography variant="h6" component="div" sx={{
-            color: 'primary.main',
-            fontWeight: 'bold',
-            fontSize: '1.5rem'
-          }}>
-            Wedding Planner
-          </Typography>
-        </Link>
-      </Toolbar>
+        <IconButton onClick={handleDesktopDrawerToggle} sx={{ color: 'primary.main' }}>
+          <StreamIcon />
+        </IconButton>
+      </Box>
       <Divider />
-      <List>
+      <List sx={{ flexGrow: 1 }}>
         {menuItems.map((item) => (
           <Link href={item.path} passHref key={item.text} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <ListItem disablePadding>
+            <ListItem disablePadding sx={{ display: 'block' }}>
               <ListItemButton
-                onClick={mobileOpen ? handleDrawerToggle : undefined} // Conditional onClick
                 selected={pathname === item.path}
                 sx={{
-                  py: 1.5,
-                  pl: 3,
+                  minHeight: 48,
+                  justifyContent: desktopOpen ? 'initial' : 'center',
+                  px: 2.5,
                   '&.Mui-selected': {
-                    borderRight: '4px solid',
-                    borderColor: 'primary.main',
-                    backgroundColor: 'rgba(212, 165, 116, 0.08)',
-                  },
-                  '&.Mui-selected:hover': {
-                    backgroundColor: 'rgba(212, 165, 116, 0.12)',
-                  },
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    backgroundColor: 'rgba(186, 60, 80, 0.08)',
+                    '& .MuiListItemIcon-root': { color: 'primary.main' },
+                    '& .MuiListItemText-primary': { color: 'primary.main', fontWeight: 600 }
                   },
                 }}
               >
-                <ListItemIcon sx={{
-                  color: pathname === item.path ? 'primary.main' : 'inherit',
-                  minWidth: 40
-                }}>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: desktopOpen ? 3 : 'auto',
+                    justifyContent: 'center',
+                    color: pathname === item.path ? 'primary.main' : 'text.secondary',
+                  }}
+                >
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText primary={item.text} />
+                <ListItemText
+                  primary={item.text}
+                  sx={{
+                    opacity: desktopOpen ? 1 : 0,
+                    display: desktopOpen ? 'block' : 'none',
+                    '& .MuiListItemText-primary': { fontSize: '0.9rem', fontWeight: pathname === item.path ? 600 : 500 }
+                  }}
+                />
               </ListItemButton>
             </ListItem>
           </Link>
         ))}
       </List>
+      <Box sx={{ p: 2, display: desktopOpen ? 'block' : 'none' }}>
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={<LogoutIcon />}
+          onClick={logout}
+          sx={{
+            justifyContent: 'center',
+            backgroundColor: '#BA3C50',
+            color: '#fff',
+            fontWeight: 700,
+            borderRadius: 2,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: '#9a2e40',
+              boxShadow: '0 4px 12px rgba(186, 60, 80, 0.3)'
+            }
+          }}
+        >
+          Logout
+        </Button>
+      </Box>
     </Box>
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', bgcolor: 'background.default' }}>
       <CssBaseline />
-      <AppBar
-        position="fixed"
+
+      {/* 1. Desktop Sidebar - Full Height */}
+      <Drawer
+        variant="permanent"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          bgcolor: 'white',
-          color: 'text.primary',
+          display: { xs: 'none', sm: 'block' },
+          width: desktopOpen ? drawerWidth : 72,
+          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: desktopOpen ? drawerWidth : 72,
+            transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            overflowX: 'hidden',
+            position: 'relative',
+            height: '100%',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
+            boxShadow: 'none'
+          },
         }}
-        elevation={0}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Button
-              color="inherit"
-              size="small"
-              startIcon={<LogoutIcon />}
-              onClick={handleLogout}
-              sx={{
-                borderRadius: 2,
-                fontWeight: 500,
-                textTransform: 'none',
-                opacity: 0.8,
-                '&:hover': {
-                  opacity: 1,
-                  bgcolor: 'rgba(0,0,0,0.04)'
-                },
-                display: { xs: 'none', sm: 'flex' }
-              }}
-            >
-              Logout
-            </Button>
-            <IconButton
-              size="large"
-              aria-label="view profile"
-              onClick={() => router.push('/profile')}
-              color="inherit"
-              sx={{ p: 0 }}
-            >
-              <Avatar
-                src={user?.profile_image ? getMediaUrl(user.profile_image) : undefined}
-                sx={{
-                  width: 48,
-                  height: 48,
-                  bgcolor: user?.profile_image ? 'transparent' : 'primary.main',
-                  border: '2px solid',
-                  borderColor: 'primary.main'
-                }}
-              >
-                {user?.first_name?.[0] || user?.email?.[0] || 'U'}
-              </Avatar>
-            </IconButton>
+        {drawer}
+      </Drawer>
+
+      {/* 2. Main content Column [Header, Main] */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
+        <PublicHeader />
+
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            height: '100%',
+            overflowY: 'auto',
+            backgroundColor: 'background.default',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <Box sx={{ px: { xs: 2, md: 6 }, py: { xs: 4, md: 6 }, flexGrow: 1, width: '100%' }} className="fade-in-up">
+            {children}
           </Box>
-          <div>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon>
-                  <LogoutIcon fontSize="small" />
-                </ListItemIcon>
-                Logout
-              </MenuItem>
-            </Menu>
-          </div>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      >
-        {/* Mobile drawer */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better mobile performance
-          }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        {/* Desktop drawer */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
+          <PublicFooter />
+        </Box>
       </Box>
-      <Box
-        component="main"
+
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
         sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          backgroundColor: 'background.default',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column'
+          display: { xs: 'block', sm: 'none' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
         }}
       >
-        <Toolbar /> {/* This empty Toolbar provides spacing below AppBar */}
-        {children}
-      </Box>
+        {drawer}
+      </Drawer>
     </Box>
   );
 }

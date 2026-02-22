@@ -14,10 +14,15 @@ import {
   CircularProgress,
 } from '@mui/material';
 import Link from 'next/link';
+import { useTheme } from '@mui/material/styles';
 import { useAuth } from '@/context/AuthContext';
+import PublicHeader from '@/components/PublicHeader';
+import PublicFooter from '@/components/PublicFooter';
 
 export default function LoginPage() {
+  const theme = useTheme();
   const [formData, setFormData] = useState({
+    // ... (rest of the file remains same, I'm just ensuring initialization is there)
     username: '',
     password: '',
   });
@@ -55,22 +60,33 @@ export default function LoginPage() {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          py: 8,
-        }}
-      >
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      background: theme => theme.palette.mode === 'light'
+        ? 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)'
+        : 'linear-gradient(135deg, #1a1625 0%, #121019 100%)'
+    }}>
+      <PublicHeader />
+      <Container maxWidth="sm" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', py: 4 }}>
         <Paper
-          elevation={3}
+          className="fade-in"
+          elevation={0}
           sx={{
             p: 6,
             width: '100%',
-            borderRadius: 3,
+            borderRadius: 4,
+            background: theme => theme.palette.mode === 'light'
+              ? 'rgba(255, 255, 255, 0.9)'
+              : 'rgba(36, 30, 48, 0.95)',
+            backdropFilter: 'blur(12px)',
+            border: theme => theme.palette.mode === 'light'
+              ? '1px solid rgba(255, 255, 255, 0.3)'
+              : '1px solid rgba(255, 255, 255, 0.05)',
+            boxShadow: theme => theme.palette.mode === 'light'
+              ? '0 8px 32px 0 rgba(31, 38, 135, 0.07)'
+              : '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
           }}
         >
           <Box
@@ -78,23 +94,26 @@ export default function LoginPage() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              mb: 3,
+              mb: 4,
             }}
           >
             <Box sx={{ mb: 2 }}>
               <img
-                src="/niyara-logo-main.jpg"
+                src={theme.palette.mode === 'light' ? "/niyara-logo-main.jpg" : "/niyara-logo-white.png"}
                 alt="Niyara Weddings"
                 style={{ height: '50px', objectFit: 'contain' }}
               />
             </Box>
-            <Typography variant="h5" sx={{ mb: 3 }}>
-              Sign in
+            <Typography variant="h4" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', letterSpacing: '-0.5px' }}>
+              Login
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Welcome back to your wedding storyboard
             </Typography>
           </Box>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 3, whiteSpace: 'pre-wrap' }}>
+            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
               {error}
             </Alert>
           )}
@@ -111,8 +130,8 @@ export default function LoginPage() {
               autoFocus
               value={formData.username}
               onChange={handleChange}
-              placeholder="e.g. wanjiru kiriba"
-              sx={{ mb: 2 }}
+              placeholder="Your username"
+              sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
             <TextField
               margin="normal"
@@ -125,45 +144,45 @@ export default function LoginPage() {
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
-              sx={{ mb: 3 }}
+              sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
 
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              color="primary"
               disabled={loading}
+              className="premium-button-hover"
               sx={{
-                py: 1.5,
+                py: 1.8,
                 fontSize: '1rem',
                 mb: 2,
+                backgroundColor: '#BA3C50',
+                borderRadius: 2,
+                fontWeight: 700,
+                textTransform: 'none',
+                color: '#fff',
+                boxShadow: '0 4px 14px 0 rgba(186, 60, 80, 0.39)',
+                '&:hover': {
+                  backgroundColor: '#9a2e40',
+                }
               }}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
             </Button>
 
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <MuiLink component={Link} href="/register" variant="body2" color="secondary">
-                Don&apos;t have an account? Register
-              </MuiLink>
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Don&apos;t have an account?{' '}
+                <MuiLink component={Link} href="/register" sx={{ color: 'primary.main', fontWeight: 600, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                  Sign Up
+                </MuiLink>
+              </Typography>
             </Box>
           </Box>
         </Paper>
-      </Box>
-      <Box
-        component="footer"
-        sx={{
-          mt: 8,
-          py: 3,
-          textAlign: 'center',
-          color: 'text.secondary',
-        }}
-      >
-        <Typography variant="body2">
-          © {new Date().getFullYear()} Niyara Weddings. All rights reserved.
-        </Typography>
-      </Box>
-    </Container>
+      </Container>
+      <PublicFooter />
+    </Box >
   );
 }

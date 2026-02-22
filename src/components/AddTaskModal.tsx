@@ -105,8 +105,8 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
   };
 
   return (
-    <Modal 
-      open={open} 
+    <Modal
+      open={open}
       onClose={(event, reason) => {
         if (reason !== 'backdropClick') {
           onClose();
@@ -193,11 +193,17 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ backgroundColor: '#1976d2' }}
+              sx={{
+                backgroundColor: '#BA3C50',
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: 'none',
+                '&:hover': { backgroundColor: '#9a2e40' }
+              }}
             >
-              {loading ? 'Saving...' : task ? 'Update Task' : 'Add Task'}
+              {loading ? 'Saving...' : task ? 'Update Action' : 'Add Action'}
             </Button>
-            <Button variant="outlined" fullWidth onClick={onClose}>
+            <Button variant="outlined" fullWidth onClick={onClose} sx={{ borderRadius: 2, textTransform: 'none', color: '#433B5C', borderColor: 'rgba(67, 59, 92, 0.2)' }}>
               Cancel
             </Button>
           </Box>

@@ -180,11 +180,17 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ backgroundColor: '#d4af37', color: '#1a1a1a', '&:hover': { backgroundColor: '#b8962e' } }}
+              sx={{
+                backgroundColor: '#BA3C50',
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: 'none',
+                '&:hover': { backgroundColor: '#9a2e40' }
+              }}
             >
               {loading ? 'Saving...' : guest ? 'Update Guest' : 'Add Guest'}
             </Button>
-            <Button variant="outlined" fullWidth onClick={onClose}>
+            <Button variant="outlined" fullWidth onClick={onClose} sx={{ borderRadius: 2, textTransform: 'none', color: '#433B5C', borderColor: 'rgba(67, 59, 92, 0.2)' }}>
               Cancel
             </Button>
           </Box>

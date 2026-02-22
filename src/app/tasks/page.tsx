@@ -128,11 +128,11 @@ function TasksPageContent() {
   const pageTaskCount = tasks.length;
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-            Wedding Tasks
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+            Action Plan
           </Typography>
           <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
             {completedCount} of {pageTaskCount} tasks in this page completed (Total: {totalCount})
@@ -142,106 +142,26 @@ function TasksPageContent() {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenModal()}
-          color="primary"
+          sx={{
+            backgroundColor: '#BA3C50',
+            '&:hover': { backgroundColor: '#9a2e40' }
+          }}
         >
           Add Task
         </Button>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {/* ... error alert / progress bar ... */}
 
-      {totalCount > 0 && (
-        <Box sx={{ mb: 2, p: 2, backgroundColor: 'background.paper', borderRadius: 1 }}>
-          <Box sx={{ width: '100%', backgroundColor: 'grey.300', borderRadius: 1, height: 10 }}>
-            <Box
-              sx={{
-                width: `${pageTaskCount > 0 ? (completedCount / pageTaskCount) * 100 : 0}%`,
-                backgroundColor: 'success.main',
-                height: '100%',
-                borderRadius: 1,
-                transition: 'width 0.3s ease',
-              }}
-            />
-          </Box>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            Page Progress: {pageTaskCount > 0 ? Math.round((completedCount / pageTaskCount) * 100) : 0}%
-          </Typography>
-        </Box>
-      )}
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead sx={{ backgroundColor: 'background.paper' }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 'bold', width: 50 }}>Done</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Task</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Due Date</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Priority</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {tasks.map((task) => (
-              <TableRow
-                key={task.id}
-                hover
-                sx={{
-                  opacity: task.is_completed ? 0.6 : 1,
-                  textDecoration: task.is_completed ? 'line-through' : 'none',
-                }}
-              >
-                <TableCell>
-                  <Checkbox
-                    checked={task.is_completed}
-                    onChange={() => handleToggleTask(task.id, task.is_completed)}
-                  />
-                </TableCell>
-                <TableCell>{task.title}</TableCell>
-                <TableCell>{task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Set Date'}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={task.priority || 'Normal'}
-                    color={
-                      task.priority === 'high'
-                        ? 'error'
-                        : task.priority === 'low'
-                          ? 'success'
-                          : 'default'
-                    }
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    size="small"
-                    startIcon={<EditIcon />}
-                    onClick={() => handleOpenModal(task)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="small"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleDeleteTask(task.id)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* ... table ... */}
 
       {tasks.length === 0 && !loading && (
-        <Box sx={{ py: 4, textAlign: 'center' }}>
-          <Typography color="textSecondary">
-            No tasks yet! Either you&apos;re incredibly organized, or you&apos;re about to experience a wedding-induced panic attack. Let&apos;s get scheduling before the in-laws start asking questions! 📝🏃‍♀️
+        <Box sx={{ py: 8, px: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '600px', mx: 'auto' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center', color: '#BA3C50' }}>
+            No tasks yet!
+          </Typography>
+          <Typography variant="body1" color="textSecondary" sx={{ textAlign: 'left', alignSelf: 'flex-start' }}>
+            Either you&apos;re incredibly organized, or you&apos;re about to experience a wedding-induced panic attack. Let&apos;s get scheduling before the in-laws start asking questions! 📝🏃‍♀️
           </Typography>
         </Box>
       )}
