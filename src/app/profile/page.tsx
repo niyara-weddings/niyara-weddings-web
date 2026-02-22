@@ -38,7 +38,6 @@ function ProfilePageContent() {
       if (result.success && result.data) {
         setProfile(result.data);
       } else {
-        // If no profile exists, create a default structure
         setProfile({
           groom_name: '',
           bride_name: '',
@@ -46,7 +45,7 @@ function ProfilePageContent() {
           venue: '',
           budget: 0,
         });
-        setIsEditing(true); // Go directly into edit mode if no profile exists
+        setIsEditing(true);
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred');
@@ -94,10 +93,10 @@ function ProfilePageContent() {
   }
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-          Wedding Profile
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3, color: 'text.primary' }}>
+          Wedding Canvas
         </Typography>
 
         {profile && (
@@ -106,7 +105,7 @@ function ProfilePageContent() {
               currentImage={profile.profile_image}
               onUploadSuccess={(newUrl) => {
                 setProfile((prev: any) => ({ ...prev, profile_image: newUrl }));
-                refreshUser(); // Update global user state for header avatar
+                refreshUser();
               }}
               onError={(msg) => setError(msg)}
             />
@@ -125,8 +124,18 @@ function ProfilePageContent() {
         )}
 
         {profile && (
-          <Card>
-            <CardContent>
+          <Card sx={{
+            borderRadius: '24px',
+            border: (theme) => theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+            boxShadow: (theme) => theme.palette.mode === 'dark'
+              ? '0 8px 32px rgba(0,0,0,0.4)'
+              : '0 8px 32px rgba(0,0,0,0.05)',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#ffffff',
+            backgroundImage: (theme) => theme.palette.mode === 'dark'
+              ? 'linear-gradient(rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03))'
+              : 'none'
+          }}>
+            <CardContent sx={{ p: { xs: 3, md: 5 } }}>
               <Grid container spacing={3}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
@@ -185,16 +194,16 @@ function ProfilePageContent() {
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
                 {isEditing ? (
                   <>
-                    <Button onClick={() => setIsEditing(false)} sx={{ mr: 1 }}>
+                    <Button onClick={() => setIsEditing(false)} sx={{ mr: 1, color: '#433B5C' }}>
                       Cancel
                     </Button>
-                    <Button variant="contained" color="primary" onClick={handleSave}>
-                      Save
+                    <Button variant="contained" onClick={handleSave} sx={{ backgroundColor: '#BA3C50', '&:hover': { backgroundColor: '#9a2e40' } }}>
+                      Save Settings
                     </Button>
                   </>
                 ) : (
-                  <Button variant="contained" color="primary" onClick={() => setIsEditing(true)}>
-                    Edit
+                  <Button variant="contained" onClick={() => setIsEditing(true)} sx={{ backgroundColor: '#BA3C50', '&:hover': { backgroundColor: '#9a2e40' } }}>
+                    Edit Canvas
                   </Button>
                 )}
               </Box>

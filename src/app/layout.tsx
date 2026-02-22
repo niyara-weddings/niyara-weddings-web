@@ -3,8 +3,11 @@ import './globals.css';
 import Providers from '@/components/Providers';
 
 export const metadata = {
-  title: "Wedding Planner",
+  title: "Niyara Weddings",
   description: "Plan your perfect wedding",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

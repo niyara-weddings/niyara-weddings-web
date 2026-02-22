@@ -102,7 +102,7 @@ function Dashboard() {
       if (progressRes.success) {
         setProgress(progressRes.data);
       }
-      
+
       setLoading(false);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
@@ -112,9 +112,9 @@ function Dashboard() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 100px)' }}>
-      <Box sx={{ my: 4, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-        <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+        <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'text.primary' }}>
           The Planning Storyboard
         </Typography>
 
@@ -183,7 +183,7 @@ function Dashboard() {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <CalendarIcon sx={{ mr: 1, color: 'primary.main' }} />
                       <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                        Next Milestones
+                        Action Plan Milestones
                       </Typography>
                     </Box>
                     <Divider sx={{ mb: 2 }} />
@@ -194,17 +194,22 @@ function Dashboard() {
                             <ListItemIcon sx={{ minWidth: 40 }}>
                               <CheckCircleIcon color="success" />
                             </ListItemIcon>
-                            <ListItemText 
-                              primary={milestone} 
+                            <ListItemText
+                              primary={milestone}
                               primaryTypographyProps={{ fontWeight: 500 }}
                             />
                           </ListItem>
                         ))}
                       </List>
                     ) : (
-                      <Typography color="textSecondary" sx={{ py: 2, textAlign: 'center' }}>
-                        No immediate milestones. Relax and have some chai! ☕️
-                      </Typography>
+                      <Box sx={{ py: 4, textAlign: 'center' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1, textAlign: 'center' }}>
+                          No immediate milestones.
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'left' }}>
+                          Relax and have some chai! You've officially earned a break. ☕️
+                        </Typography>
+                      </Box>
                     )}
                   </CardContent>
                 </Card>
@@ -217,13 +222,13 @@ function Dashboard() {
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
                       Wedding Readiness
                     </Typography>
-                    
+
                     {/* USP Badge: Planning Phase */}
                     <Box sx={{ mb: 3 }}>
-                      <Chip 
-                        label={progress?.overall_progress > 70 ? "Final Stretch" : progress?.overall_progress > 30 ? "Selection Phase" : "Research Phase"} 
-                        color="secondary" 
-                        size="small" 
+                      <Chip
+                        label={progress?.overall_progress > 70 ? "Final Stretch" : progress?.overall_progress > 30 ? "Selection Phase" : "Research Phase"}
+                        color="secondary"
+                        size="small"
                         sx={{ fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}
                       />
                     </Box>
@@ -265,7 +270,7 @@ function Dashboard() {
                         </Typography>
                       </Box>
                     </Box>
-                    
+
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 4, px: 2 }}>
                       Weighted score: {progress?.overall_progress > 50 ? "You're on top of things!" : "Time to dive in."}
                     </Typography>
@@ -280,16 +285,16 @@ function Dashboard() {
                         </Typography>
                       </Box>
                       <Box sx={{ width: '100%', bgcolor: 'grey.200', borderRadius: 1, height: 8, mb: 2 }}>
-                        <Box 
-                          sx={{ 
-                            width: `${progress?.total_budget ? (progress.budget_used / progress.total_budget) * 100 : 0}%`, 
-                            bgcolor: 'secondary.main', 
-                            height: '100%', 
-                            borderRadius: 1 
-                          }} 
+                        <Box
+                          sx={{
+                            width: `${progress?.total_budget ? (progress.budget_used / progress.total_budget) * 100 : 0}%`,
+                            bgcolor: 'secondary.main',
+                            height: '100%',
+                            borderRadius: 1
+                          }}
                         />
                       </Box>
-                      
+
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="body2" color="textSecondary">Countdown</Typography>
                         <Typography variant="body2" fontWeight="bold" color="primary.main">
@@ -301,14 +306,19 @@ function Dashboard() {
                 </Card>
               </Grid>
             </Grid>
+
+            {/* Restored Humor/Quotes Section */}
+            <Box sx={{ mt: 6, p: 3, borderLeft: '4px solid #BA3C50', bgcolor: 'rgba(186, 60, 80, 0.05)', borderRadius: '0 8px 8px 0' }}>
+              <Typography variant="body1" sx={{ fontStyle: 'italic', mb: 1, color: 'text.primary' }}>
+                &quot;Your dashboard is ready! Now let&apos;s start clicking around the sidebar before your partner realizes you haven&apos;t planned a single thing. 💍😅&quot;
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#BA3C50', textTransform: 'uppercase' }}>
+                Plan wisely, party harder.
+              </Typography>
+            </Box>
           </>
         )}
 
-        <Box sx={{ mt: 'auto', pb: 4, textAlign: 'center', borderTop: '1px solid', borderColor: 'grey.100', pt: 4 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', letterSpacing: 0.5, opacity: 0.8 }}>
-            "Your dashboard is live! Take a deep breath and start clicking—before the in-laws start calling." 💍✨
-          </Typography>
-        </Box>
       </Box>
     </Container>
   );

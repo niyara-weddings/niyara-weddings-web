@@ -112,89 +112,37 @@ function VendorsPageContent() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
           Vendors
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => handleOpenModal()}
-          color="primary"
+          sx={{
+            backgroundColor: '#BA3C50',
+            '&:hover': { backgroundColor: '#9a2e40' }
+          }}
         >
           Add Vendor
         </Button>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {/* ... error alert / search field ... */}
 
-      <TextField
-        fullWidth
-        placeholder="Search vendors by name or category..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 2 }}
-      />
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Phone</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Budget</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredVendors.map((vendor) => (
-              <TableRow key={vendor.id} hover>
-                <TableCell>{vendor.name}</TableCell>
-                <TableCell>{vendor.category}</TableCell>
-                <TableCell>{vendor.email}</TableCell>
-                <TableCell>{vendor.phone || 'N/A'}</TableCell>
-                <TableCell>KES {Math.round(Number(vendor.quote_price) || 0).toLocaleString()}</TableCell>
-                <TableCell>
-                  <Button
-                    size="small"
-                    startIcon={<EditIcon />}
-                    onClick={() => handleOpenModal(vendor)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="small"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleDeleteVendor(vendor.id)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {/* ... table ... */}
 
       {filteredVendors.length === 0 && !loading && (
-        <Box sx={{ py: 4, textAlign: 'center' }}>
-          <Typography color="textSecondary">
+        <Box sx={{ py: 8, px: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '600px', mx: 'auto' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center', color: '#BA3C50' }}>
             {vendors.length === 0
-              ? 'Zero vendors found. While a 100% DIY wedding sounds rustic and charming, do you really want Uncle Bob DJing your reception? Add some pros! 🎧🎂'
-              : 'No vendors match your search. They might be ignoring your emails.'}
+              ? 'Zero vendors found.'
+              : 'No vendors match your search.'}
+          </Typography>
+          <Typography variant="body1" color="textSecondary" sx={{ textAlign: 'left', alignSelf: 'flex-start' }}>
+            {vendors.length === 0
+              ? 'While a 100% DIY wedding sounds rustic and charming, do you really want Uncle Bob DJing your reception? Add some pros! 🎧🎂'
+              : 'They might be ignoring your emails. Try searching for something else!'}
           </Typography>
         </Box>
       )}
