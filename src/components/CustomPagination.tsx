@@ -35,6 +35,19 @@ export default function CustomPagination({
                     size="large"
                     showFirstButton
                     showLastButton
+                    sx={{
+                        '& .MuiPaginationItem-root': {
+                            borderRadius: '30px', // Pill-shaped as per guidelines
+                            fontWeight: 'bold',
+                            '&.Mui-selected': {
+                                backgroundColor: '#BA3C50',
+                                color: '#fff',
+                                '&:hover': {
+                                    backgroundColor: '#9a2e40',
+                                }
+                            }
+                        }
+                    }}
                 />
             </Stack>
         </Box>

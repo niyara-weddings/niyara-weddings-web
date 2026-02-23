@@ -12,7 +12,9 @@ import {
   Button,
   Typography,
   Alert,
+  useTheme,
 } from '@mui/material';
+import { apiPost, apiPut } from '@/utils/api';
 
 import { Vendor } from '@/types';
 
@@ -27,6 +29,7 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
   const [formData, setFormData] = useState<Partial<Vendor>>({
     name: '',
     category: '',
+    contact_person: '',
     email: '',
     phone: '',
     quote_price: '',
@@ -35,24 +38,35 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
   const [loading, setLoading] = useState(false);
 
   const categories = [
+    { label: 'Venue', value: 'venue' },
     { label: 'Catering', value: 'catering' },
     { label: 'Photography', value: 'photography' },
     { label: 'Videography', value: 'videography' },
-    { label: 'Venue', value: 'venue' },
-    { label: 'Decorations', value: 'decorations' },
     { label: 'Music/DJ', value: 'music_dj' },
+    { label: 'Decorations', value: 'decorations' },
     { label: 'Flowers', value: 'flowers' },
+    { label: 'Attire', value: 'attire' },
     { label: 'Cake', value: 'cake' },
     { label: 'Other', value: 'other' },
   ];
 
+  const theme = useTheme();
+
   useEffect(() => {
     if (vendor) {
-      setFormData(vendor);
+      setFormData({
+        name: vendor.name || '',
+        category: vendor.category || '',
+        contact_person: vendor.contact_person || '',
+        email: vendor.email || '',
+        phone: vendor.phone || '',
+        quote_price: vendor.quote_price ? String(Math.round(Number(vendor.quote_price))) : '',
+      });
     } else {
       setFormData({
         name: '',
         category: '',
+        contact_person: '',
         email: '',
         phone: '',
         quote_price: '',
@@ -74,35 +88,19 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      if (!formData.name || !formData.category || !formData.email) {
-        throw new Error('Name, Category, and Email are required');
+      if (!formData.name || !formData.category || !formData.email || !formData.contact_person || !formData.phone) {
+        throw new Error('Name, Category, Contact Person, Email, and Phone are required');
       }
 
-      let response;
+      let result;
       if (vendor) {
-        response = await fetch(`${apiUrl}/api/v1/vendors/${vendor.id}/update/`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include',
-        });
+        result = await apiPut(`/api/v1/vendors/${vendor.id}/update/`, formData);
       } else {
-        response = await fetch(`${apiUrl}/api/v1/vendors/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include',
-        });
+        result = await apiPost('/api/v1/vendors/', formData);
       }
 
-      if (!response.ok) {
-        throw new Error(vendor ? 'Failed to update vendor' : 'Failed to add vendor');
+      if (!result.success) {
+        throw new Error(result.message || (vendor ? 'Failed to update vendor' : 'Failed to add vendor'));
       }
 
       onSuccess();
@@ -130,7 +128,8 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: 400,
-          backgroundColor: 'white',
+          bgcolor: 'background.paper',
+          color: 'text.primary',
           p: 4,
           borderRadius: 2,
           boxShadow: 24,
@@ -188,21 +187,34 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
 
           <TextField
             fullWidth
+            label="Contact Person"
+            name="contact_person"
+            value={formData.contact_person}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+
+          <TextField
+            fullWidth
             label="Phone"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             margin="normal"
+            required
           />
 
           <TextField
             fullWidth
-            label="Quote Price"
+            label="Quote (KES)"
             name="quote_price"
             type="number"
-            value={formData.quote_price}
+            value={formData.quote_price || ''}
+            placeholder="Enter amount"
             onChange={handleChange}
             margin="normal"
+            InputLabelProps={{ shrink: true }}
           />
 
           <Box sx={{ mt: 3, display: 'flex', gap: 1 }}>
@@ -211,11 +223,18 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ backgroundColor: '#d4af37', color: '#1a1a1a', '&:hover': { backgroundColor: '#b8962e' } }}
+              sx={{
+                backgroundColor: '#BA3C50',
+                color: 'white',
+                borderRadius: 2,
+                fontWeight: 600,
+                textTransform: 'none',
+                '&:hover': { backgroundColor: '#9a2e40' }
+              }}
             >
               {loading ? 'Saving...' : vendor ? 'Update Vendor' : 'Add Vendor'}
             </Button>
-            <Button variant="outlined" fullWidth onClick={onClose}>
+            <Button variant="outlined" fullWidth onClick={onClose} sx={{ borderRadius: 2, textTransform: 'none', color: 'text.secondary', borderColor: 'divider' }}>
               Cancel
             </Button>
           </Box>
