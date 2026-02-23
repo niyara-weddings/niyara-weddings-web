@@ -19,6 +19,28 @@ const onRefreshed = (access_token: string) => {
   refreshSubscribers = [];
 };
 
+/**
+ * Build the request URL. In the browser, use relative URLs so requests
+ * flow through Next.js rewrites (no CORS). On the server or for non-API
+ * paths, fall back to the full BASE_URL.
+ */
+function buildUrl(endpoint: string): string {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const isClient = typeof window !== 'undefined';
+
+  if (isClient && cleanEndpoint.startsWith('/api/')) {
+    // Relative URL → Next.js rewrites proxy to backend → zero CORS issues
+    return cleanEndpoint;
+  }
+
+  const baseUrl = BASE_URL?.replace(/\/$/, '') || '';
+  let url = `${baseUrl}${cleanEndpoint}`;
+  if (baseUrl.endsWith('/api') && cleanEndpoint.startsWith('/api/')) {
+    url = `${baseUrl}${cleanEndpoint.substring(4)}`;
+  }
+  return url;
+}
+
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
   let data;
   try {
@@ -31,19 +53,21 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
     return {
       success: false,
       data: null as any,
-      message: data.message || 'An error occurred',
+      message: data.message || `Request failed (${response.status})`,
       errors: data.errors || [],
       status: data.status || 'error',
-      code: response.status
+      code: response.status,
+      meta: null,
     };
   }
 
   return {
     success: true,
-    data: data.data || data,
+    data: data.data ?? data,
     message: data.message || 'Success',
     status: data.status || 'success',
-    code: response.status
+    code: response.status,
+    meta: data.meta || null,
   };
 }
 
@@ -51,17 +75,22 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
   const headers = new Headers(options.headers || {});
   options.credentials = 'include';
 
-  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+  // Only set Content-Type for requests that have a body
+  if (options.body && !headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
 
-  let response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+  const url = buildUrl(endpoint);
+
+  let response = await fetch(url, { ...options, headers });
 
   if (response.status === 401) {
     if (!isRefreshing) {
       isRefreshing = true;
       try {
-        const refreshRes = await fetch(`${BASE_URL}/api/v1/auth/token/refresh/`, {
+        const refreshUrl = buildUrl('/api/v1/auth/token/refresh/');
+
+        const refreshRes = await fetch(refreshUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'
@@ -69,8 +98,7 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
 
         if (refreshRes.ok) {
           onRefreshed("token_refreshed");
-          // Retry original request, browser automatically routes Set-Cookie headers
-          response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+          response = await fetch(url, { ...options, headers });
         } else {
           throw new Error("Token refresh rejected");
         }
@@ -80,10 +108,9 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
         isRefreshing = false;
       }
     } else {
-      // Wait for the token to be refreshed
       return new Promise<Response>((resolve) => {
         subscribeTokenRefresh(() => {
-          fetch(`${BASE_URL}${endpoint}`, { ...options, headers }).then(resolve);
+          fetch(url, { ...options, headers }).then(resolve);
         });
       });
     }
@@ -93,17 +120,15 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
 }
 
 export const apiGet = async <T = any>(endpoint: string): Promise<ApiResponse<T>> => {
-  if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
     const response = await fetchWithInterceptor(endpoint, { method: 'GET' });
     return await handleResponse<T>(response);
   } catch (error: any) {
-    return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
+    return { success: false, message: error.message || 'Network error', data: null as any, errors: [error.message], status: 'error', code: 0 };
   }
 };
 
 export const apiPost = async <T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> => {
-  if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
     const isFormData = body instanceof FormData;
     const response = await fetchWithInterceptor(endpoint, {
@@ -112,12 +137,11 @@ export const apiPost = async <T = any>(endpoint: string, body: any): Promise<Api
     });
     return await handleResponse<T>(response);
   } catch (error: any) {
-    return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
+    return { success: false, message: error.message || 'Network error', data: null as any, errors: [error.message], status: 'error', code: 0 };
   }
 };
 
 export const apiPut = async <T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> => {
-  if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
     const isFormData = body instanceof FormData;
     const response = await fetchWithInterceptor(endpoint, {
@@ -126,12 +150,11 @@ export const apiPut = async <T = any>(endpoint: string, body: any): Promise<ApiR
     });
     return await handleResponse<T>(response);
   } catch (error: any) {
-    return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
+    return { success: false, message: error.message || 'Network error', data: null as any, errors: [error.message], status: 'error', code: 0 };
   }
 };
 
 export const apiPatch = async <T = any>(endpoint: string, body: any): Promise<ApiResponse<T>> => {
-  if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
     const isFormData = body instanceof FormData;
     const response = await fetchWithInterceptor(endpoint, {
@@ -140,22 +163,27 @@ export const apiPatch = async <T = any>(endpoint: string, body: any): Promise<Ap
     });
     return await handleResponse<T>(response);
   } catch (error: any) {
-    return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
+    return { success: false, message: error.message || 'Network error', data: null as any, errors: [error.message], status: 'error', code: 0 };
   }
 };
 
 export const apiDelete = async <T = any>(endpoint: string): Promise<ApiResponse<T>> => {
-  if (!BASE_URL) return { success: false, message: "API URL missing", data: null as any, status: 'error', code: 500 };
   try {
     const response = await fetchWithInterceptor(endpoint, { method: 'DELETE' });
     return await handleResponse<T>(response);
   } catch (error: any) {
-    return { success: false, message: error.message, data: null as any, errors: [error.message], status: 'error', code: 500 };
+    return { success: false, message: error.message || 'Network error', data: null as any, errors: [error.message], status: 'error', code: 0 };
   }
 };
 
 export const getMediaUrl = (path: string | null | undefined): string => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  return `${BASE_URL}${path}`;
+  const baseUrl = BASE_URL?.replace(/\/$/, '') || '';
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+
+  if (baseUrl.endsWith('/api') && cleanPath.startsWith('/api/')) {
+    return `${baseUrl}${cleanPath.substring(4)}`;
+  }
+  return `${baseUrl}${cleanPath}`;
 };
