@@ -69,6 +69,15 @@ export interface Task {
     updated_at: string;
 }
 
+export interface PaginationMeta {
+    current_page: number;
+    per_page: number;
+    total_items: number;
+    total_pages: number;
+    has_next: boolean;
+    has_previous: boolean;
+}
+
 export interface ApiResponse<T = any> {
     success: boolean;
     data: T;
@@ -77,4 +86,5 @@ export interface ApiResponse<T = any> {
     code: number;
     error?: string; // Sometimes populated on failure
     errors?: any[]; // Detailed validation errors
+    meta?: { pagination: PaginationMeta } | null;
 }

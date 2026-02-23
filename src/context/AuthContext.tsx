@@ -24,8 +24,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
   useEffect(() => {
     const checkAuthStatus = async () => {
       setLoading(true);
@@ -70,14 +68,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (username: string, password: string) => {
-    if (!API_URL) return { success: false, error: "Frontend Error: API URL not set in .env.local" };
-
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/login/`, {
+      const response = await fetch('/api/v1/auth/login/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
         credentials: 'include'
       });
@@ -90,14 +84,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (userData: any) => {
-    if (!API_URL) return { success: false, error: "Frontend Error: API URL not set in .env.local" };
-
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/register/`, {
+      const response = await fetch('/api/v1/auth/register/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
         credentials: 'include'
       });
@@ -110,15 +100,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    if (API_URL) {
-      try {
-        await fetch(`${API_URL}/api/v1/auth/logout/`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-      } catch (e) {
-        console.error("Server logout failed", e);
-      }
+    try {
+      await fetch('/api/v1/auth/logout/', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (e) {
+      console.error("Server logout failed", e);
     }
     setUser(null);
   };

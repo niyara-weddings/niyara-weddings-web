@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
-import { apiGet, apiPut, apiPost } from '@/utils/api';
+import { apiGet, apiPut, apiPost, apiPatch } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 
 function ProfilePageContent() {
@@ -43,7 +43,7 @@ function ProfilePageContent() {
           bride_name: '',
           wedding_date: '',
           venue: '',
-          budget: 0,
+          budget: '',
         });
         setIsEditing(true);
       }
@@ -61,17 +61,24 @@ function ProfilePageContent() {
 
   const handleSave = async () => {
     try {
-      const profileData = {
-        groom_name: profile.groom_name,
-        bride_name: profile.bride_name,
-        wedding_date: profile.wedding_date,
-        venue: profile.venue,
-        budget: profile.budget,
-      };
+      setError(null);
+      // Only send fields that have values to avoid triggering validators on empty fields
+      const profileData: Record<string, any> = {};
+      if (profile.groom_name) profileData.groom_name = profile.groom_name;
+      if (profile.bride_name) profileData.bride_name = profile.bride_name;
+      if (profile.wedding_date) profileData.wedding_date = profile.wedding_date;
+      if (profile.venue) profileData.venue = profile.venue;
+      if (profile.budget && Number(profile.budget) > 0) {
+        profileData.budget = Math.round(Number(profile.budget));
+      }
 
-      const endpoint = profile.id ? `/api/v1/profiles/me/update/` : `/api/v1/profiles/`;
-      const method = profile.id ? apiPut : apiPost;
-      const result = await method(endpoint, profileData);
+      let result;
+      if (profile.id) {
+        // Use PATCH so only provided fields are validated
+        result = await apiPatch(`/api/v1/profiles/me/update/`, profileData);
+      } else {
+        result = await apiPost(`/api/v1/profiles/`, profileData);
+      }
 
       if (result.success) {
         setIsEditing(false);
@@ -182,12 +189,14 @@ function ProfilePageContent() {
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
-                    label="Budget"
+                    label="Budget (KES)"
                     name="budget"
                     type="number"
-                    value={profile.budget || 0}
+                    value={profile.budget ? Math.round(Number(profile.budget)) : ''}
+                    placeholder="Min 50,000 KES"
                     onChange={handleInputChange}
                     disabled={!isEditing}
+                    InputLabelProps={{ shrink: true }}
                   />
                 </Grid>
               </Grid>

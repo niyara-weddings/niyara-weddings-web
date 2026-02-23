@@ -12,7 +12,9 @@ import {
   Button,
   Typography,
   Alert,
+  useTheme,
 } from '@mui/material';
+import { apiPost, apiPut } from '@/utils/api';
 
 import { Task } from '@/types';
 
@@ -29,6 +31,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
     description: '',
     due_date: '',
     priority: 'medium' as any,
+    assigned_to: 'couple' as any,
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,6 +43,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
         description: task.description || '',
         due_date: task.due_date ? task.due_date.split('T')[0] : '',
         priority: task.priority || ('medium' as any),
+        assigned_to: task.assigned_to || ('couple' as any),
       });
     } else {
       setFormData({
@@ -47,9 +51,12 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
         description: '',
         due_date: '',
         priority: 'medium' as any,
+        assigned_to: 'couple' as any,
       });
     }
   }, [task, open]);
+
+  const theme = useTheme();
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -65,35 +72,19 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
       if (!formData.title || !formData.due_date) {
         throw new Error('Title and Due Date are required');
       }
 
-      let response;
+      let result;
       if (task) {
-        response = await fetch(`${apiUrl}/api/v1/tasks/${task.id}/update/`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include',
-        });
+        result = await apiPut(`/api/v1/tasks/${task.id}/update/`, formData);
       } else {
-        response = await fetch(`${apiUrl}/api/v1/tasks/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include',
-        });
+        result = await apiPost('/api/v1/tasks/', formData);
       }
 
-      if (!response.ok) {
-        throw new Error(task ? 'Failed to update task' : 'Failed to add task');
+      if (!result.success) {
+        throw new Error(result.message || (task ? 'Failed to update task' : 'Failed to add task'));
       }
 
       onSuccess();
@@ -121,7 +112,8 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: 400,
-          backgroundColor: 'white',
+          bgcolor: 'background.paper',
+          color: 'text.primary',
           p: 4,
           borderRadius: 2,
           boxShadow: 24,
@@ -187,6 +179,20 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
             </Select>
           </FormControl>
 
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel>Assigned To</InputLabel>
+            <Select
+              name="assigned_to"
+              value={formData.assigned_to}
+              onChange={handleChange}
+              label="Assigned To"
+            >
+              <MenuItem value="bride">Bride</MenuItem>
+              <MenuItem value="groom">Groom</MenuItem>
+              <MenuItem value="couple">Couple</MenuItem>
+            </Select>
+          </FormControl>
+
           <Box sx={{ mt: 3, display: 'flex', gap: 1 }}>
             <Button
               type="submit"
@@ -203,7 +209,7 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
             >
               {loading ? 'Saving...' : task ? 'Update Action' : 'Add Action'}
             </Button>
-            <Button variant="outlined" fullWidth onClick={onClose} sx={{ borderRadius: 2, textTransform: 'none', color: '#433B5C', borderColor: 'rgba(67, 59, 92, 0.2)' }}>
+            <Button variant="outlined" fullWidth onClick={onClose} sx={{ borderRadius: 2, textTransform: 'none', color: 'text.secondary', borderColor: 'divider' }}>
               Cancel
             </Button>
           </Box>
