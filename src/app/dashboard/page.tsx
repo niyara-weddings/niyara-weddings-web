@@ -247,7 +247,7 @@ function Dashboard() {
                         size={160}
                         thickness={4}
                         sx={{
-                          color: 'primary.main',
+                          color: '#2e7d32',
                           position: 'absolute',
                           left: 0,
                           transition: 'all 0.5s ease'
@@ -310,7 +310,7 @@ function Dashboard() {
             {/* Restored Humor/Quotes Section */}
             <Box sx={{ mt: 6, p: 3, borderLeft: '4px solid #BA3C50', bgcolor: 'rgba(186, 60, 80, 0.05)', borderRadius: '0 8px 8px 0' }}>
               <Typography variant="body1" sx={{ fontStyle: 'italic', mb: 1, color: 'text.primary' }}>
-                &quot;Your dashboard is ready! Now let&apos;s start clicking around the sidebar before your partner realizes you haven&apos;t planned a single thing. 💍😅&quot;
+                Your dashboard is ready! Start clicking around the sidebar before your partner realizes you haven&apos;t planned a thing. 💍😅
               </Typography>
               <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#BA3C50', textTransform: 'uppercase' }}>
                 Plan wisely, party harder.
