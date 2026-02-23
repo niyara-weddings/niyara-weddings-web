@@ -13,6 +13,7 @@ import {
   Typography,
   Alert,
 } from '@mui/material';
+import { apiPost, apiPut } from '@/utils/api';
 
 import { Guest } from '@/types';
 
@@ -35,7 +36,12 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
 
   useEffect(() => {
     if (guest) {
-      setFormData(guest);
+      setFormData({
+        name: guest.name || '',
+        email: guest.email || '',
+        phone: guest.phone || '',
+        rsvp_status: guest.rsvp_status || 'invited',
+      });
     } else {
       setFormData({ name: '', email: '', phone: '', rsvp_status: 'invited' });
     }
@@ -55,37 +61,19 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
       if (!formData.name) {
         throw new Error('Guest name is required');
       }
 
-      let response;
+      let result;
       if (guest) {
-        // Update existing guest
-        response = await fetch(`${apiUrl}/api/v1/guests/${guest.id}/update/`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include',
-        });
+        result = await apiPut(`/api/v1/guests/${guest.id}/update/`, formData);
       } else {
-        // Create new guest
-        response = await fetch(`${apiUrl}/api/v1/guests/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-          credentials: 'include',
-        });
+        result = await apiPost('/api/v1/guests/', formData);
       }
 
-      if (!response.ok) {
-        throw new Error(guest ? 'Failed to update guest' : 'Failed to add guest');
+      if (!result.success) {
+        throw new Error(result.message || (guest ? 'Failed to update guest' : 'Failed to add guest'));
       }
 
       onSuccess();
@@ -113,10 +101,13 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: 400,
-          backgroundColor: 'white',
+          bgcolor: 'background.paper',
+          color: 'text.primary',
           p: 4,
           borderRadius: 2,
           boxShadow: 24,
+          maxHeight: '90vh',
+          overflowY: 'auto',
         }}
       >
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
@@ -190,7 +181,7 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
             >
               {loading ? 'Saving...' : guest ? 'Update Guest' : 'Add Guest'}
             </Button>
-            <Button variant="outlined" fullWidth onClick={onClose} sx={{ borderRadius: 2, textTransform: 'none', color: '#433B5C', borderColor: 'rgba(67, 59, 92, 0.2)' }}>
+            <Button variant="outlined" fullWidth onClick={onClose} sx={{ borderRadius: 2, textTransform: 'none', color: 'text.secondary', borderColor: 'divider' }}>
               Cancel
             </Button>
           </Box>
