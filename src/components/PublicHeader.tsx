@@ -124,18 +124,24 @@ export default function PublicHeader({
                             <MenuIcon />
                         </IconButton>
 
-                        {/* Avatar for desktop */}
-                        <Box sx={{ ml: 1, display: { xs: 'none', md: 'block' } }}>
+                        {/* Couple avatar — prominent on all screen sizes */}
+                        <Box sx={{ ml: 1 }}>
                             <Avatar
                                 src={user?.profile_image ? getMediaUrl(user.profile_image) : undefined}
                                 onClick={() => router.push('/profile')}
                                 sx={{
-                                    width: 40,
-                                    height: 40,
+                                    width: { xs: 44, md: 56 },
+                                    height: { xs: 44, md: 56 },
                                     cursor: 'pointer',
                                     bgcolor: user?.profile_image ? 'transparent' : 'primary.main',
-                                    border: '2px solid',
-                                    borderColor: 'primary.main'
+                                    border: '3px solid',
+                                    borderColor: 'primary.main',
+                                    boxShadow: '0 2px 12px rgba(186,60,80,0.25)',
+                                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.08)',
+                                        boxShadow: '0 4px 20px rgba(186,60,80,0.4)',
+                                    }
                                 }}
                             >
                                 {user?.username?.charAt(0).toUpperCase() || 'U'}

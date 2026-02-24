@@ -151,8 +151,9 @@ const AddGuestModal = ({ open, onClose, onSuccess, guest }: AddGuestModalProps) 
           />
 
           <FormControl fullWidth margin="normal">
-            <InputLabel>RSVP Status</InputLabel>
+            <InputLabel id="rsvp-status-label">RSVP Status</InputLabel>
             <Select
+              labelId="rsvp-status-label"
               name="rsvp_status"
               value={formData.rsvp_status}
               onChange={handleChange}

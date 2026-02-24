@@ -214,8 +214,9 @@ export default function GuestsPage() {
 
         <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>RSVP Status</InputLabel>
+            <InputLabel id="rsvp-filter-label">RSVP Status</InputLabel>
             <Select
+              labelId="rsvp-filter-label"
               value={filterRsvp}
               onChange={(e) => { setFilterRsvp(e.target.value); setPage(1); }}
               label="RSVP Status"

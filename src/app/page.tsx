@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button, Container, Typography, Box, Grid, Paper, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
@@ -137,15 +138,13 @@ export default function LandingPage() {
               animation: 'fadeInUp 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards',
               position: 'relative'
             }}>
-              <img
+              <Image
                 src="/hero-wedding-image.jpg"
                 alt="Wedding Celebration"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block'
-                }}
+                fill
+                priority
+                sizes="(max-width: 900px) 100vw, 60vw"
+                style={{ objectFit: 'cover', display: 'block' }}
               />
               {/* Subtle Overlay to blend with brand */}
               <Box sx={{

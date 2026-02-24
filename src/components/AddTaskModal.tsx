@@ -166,8 +166,9 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
           />
 
           <FormControl fullWidth margin="normal">
-            <InputLabel>Priority</InputLabel>
+            <InputLabel id="priority-label">Priority</InputLabel>
             <Select
+              labelId="priority-label"
               name="priority"
               value={formData.priority}
               onChange={handleChange}
@@ -180,8 +181,9 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
           </FormControl>
 
           <FormControl fullWidth margin="normal" required>
-            <InputLabel>Assigned To</InputLabel>
+            <InputLabel id="assigned-to-label">Assigned To</InputLabel>
             <Select
+              labelId="assigned-to-label"
               name="assigned_to"
               value={formData.assigned_to}
               onChange={handleChange}
