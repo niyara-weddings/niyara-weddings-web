@@ -187,7 +187,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
       {/* 2. Main content Column [Header, Main] */}
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
-        <PublicHeader />
+        <PublicHeader onToggleMobile={handleDrawerToggle} />
 
         <Box
           component="main"

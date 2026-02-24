@@ -13,6 +13,7 @@ import { LightMode as LightModeIcon, DarkMode as DarkModeIcon } from '@mui/icons
 
 export default function PublicHeader({
     isFixed = false,
+    onToggleMobile,
 }: {
     onToggleMobile?: () => void;
     onToggleDesktop?: () => void;
@@ -112,12 +113,12 @@ export default function PublicHeader({
                             Logout
                         </Button>
 
-                        {/* Mobile Menu Icon */}
+                        {/* Mobile Menu Icon — opens sidebar drawer */}
                         <IconButton
                             color="inherit"
-                            aria-label="open menu"
+                            aria-label="open navigation menu"
                             edge="start"
-                            onClick={handleMenu}
+                            onClick={() => onToggleMobile?.()}
                             sx={{ display: { md: 'none' }, color: 'text.primary' }}
                         >
                             <MenuIcon />
