@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { Button, Container, Typography, Box, Grid, Paper } from '@mui/material';
+import { Button, Container, Typography, Box, Grid, Paper, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useRouter } from 'next/navigation';
 
 import PublicHeader from '@/components/PublicHeader';
 import PublicFooter from '@/components/PublicFooter';
+import { useAuth } from '@/context/AuthContext';
 
 const HeroSection = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
@@ -28,7 +30,7 @@ const GlassCard = styled(Paper)(({ theme }) => ({
     ? '0 8px 32px 0 rgba(31, 38, 135, 0.07)'
     : '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
   borderRadius: '32px',
-  padding: '64px',
+  // padding intentionally omitted — controlled via sx prop for responsiveness
   border: theme.palette.mode === 'light'
     ? '1px solid rgba(255, 255, 255, 0.4)'
     : '1px solid rgba(255, 255, 255, 0.05)',
@@ -44,6 +46,24 @@ const RedButton = styled(Button)(({ theme }) => ({
 }));
 
 export default function LandingPage() {
+  const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [loading, isAuthenticated, router]);
+
+  // Avoid flashing the public landing page to a logged-in user
+  if (loading || isAuthenticated) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <HeroSection>
       <PublicHeader />
@@ -69,7 +89,7 @@ export default function LandingPage() {
               <Typography variant="h5" sx={{ color: 'text.secondary', opacity: 0.8, mb: 5, fontWeight: 400, maxWidth: '90%' }}>
                 A seamless extension of Niyara Weddings. Organize your Guest Manager, Action Plan, and Vendors in one premium dashboard.
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Link href="/login" passHref style={{ textDecoration: 'none' }}>
                   <RedButton
                     variant="contained"
