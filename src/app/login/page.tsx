@@ -131,6 +131,7 @@ export default function LoginPage() {
               value={formData.username}
               onChange={handleChange}
               placeholder="Your username"
+              InputLabelProps={{ shrink: true }}
               sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
             <TextField
