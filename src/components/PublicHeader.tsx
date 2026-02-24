@@ -43,7 +43,7 @@ export default function PublicHeader({
         <Box sx={{
             width: '100%',
             py: 1.5,
-            px: 4,
+            px: { xs: 2, md: 4 },
             display: 'flex',
             alignItems: 'center',
             backgroundColor: 'background.paper',
@@ -55,7 +55,7 @@ export default function PublicHeader({
             zIndex: (theme) => theme.zIndex.drawer + 2
         }}>
             {/* Logo area - Simplified */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 1, md: 4 } }}>
                 <Link href="/" passHref style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
                     <img
                         src={mode === 'light' ? "/niyara-logo-main.jpg" : "/niyara-logo-white.png"}
@@ -85,7 +85,7 @@ export default function PublicHeader({
                             </Button>
                         ))}
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: { xs: 'auto', md: 0 } }}>
                         <IconButton onClick={toggleColorMode} color="inherit" sx={{ color: 'text.primary' }}>
                             {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
                         </IconButton>
@@ -144,18 +144,20 @@ export default function PublicHeader({
                     </Box>
                 </>
             ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
-                    <IconButton onClick={toggleColorMode} color="inherit" sx={{ mr: 1, color: 'text.primary' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
+                    <IconButton onClick={toggleColorMode} color="inherit" sx={{ color: 'text.primary' }}>
                         {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
                     </IconButton>
+                    {/* Login: hidden on mobile — already available on the landing hero card */}
                     <Link href="/login" passHref style={{ textDecoration: 'none' }}>
                         <Button
                             variant="outlined"
                             sx={{
+                                display: { xs: 'none', sm: 'inline-flex' },
                                 color: 'primary.main',
                                 borderColor: 'primary.main',
                                 borderRadius: '30px',
-                                px: 3,
+                                px: { xs: 2, md: 3 },
                                 fontWeight: 700,
                                 textTransform: 'none',
                                 '&:hover': {
@@ -174,10 +176,11 @@ export default function PublicHeader({
                                 backgroundColor: 'primary.main',
                                 color: '#fff',
                                 borderRadius: '30px',
-                                px: 3,
+                                px: { xs: 2, md: 3 },
                                 textTransform: 'none',
                                 fontWeight: 700,
                                 boxShadow: 'none',
+                                whiteSpace: 'nowrap',
                                 '&:hover': {
                                     backgroundColor: '#9a2e40',
                                     boxShadow: '0 4px 12px rgba(186,60,80,0.3)'
