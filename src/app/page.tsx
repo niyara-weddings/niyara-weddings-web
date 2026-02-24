@@ -104,7 +104,7 @@ export default function LandingPage() {
           </Grid>
 
           {/* Landscape Hero Image */}
-          <Grid size={{ xs: 12, md: 7 }} sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Box sx={{
               width: '100%',
               aspectRatio: { xs: '4/3', md: '16/10' },
