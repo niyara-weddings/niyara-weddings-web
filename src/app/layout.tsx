@@ -6,7 +6,11 @@ export const metadata = {
   title: "Niyara Weddings",
   description: "Plan your perfect wedding",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/favicon-192.png",
   },
 };
 
