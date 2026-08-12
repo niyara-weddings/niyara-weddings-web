@@ -88,11 +88,12 @@ Create a `.env.local` file in the root directory:
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_FALLBACK_API_URL=https://niyara-wedding-planner-backend.onrender.com
 DEMO_USERNAME=admin
 DEMO_PASSWORD=<demo-password>
 ```
 
-`NEXT_PUBLIC_API_URL` points the frontend proxy to the Django API server. `DEMO_USERNAME` and `DEMO_PASSWORD` power the one-click demo access button without committing demo credentials to source control.
+`NEXT_PUBLIC_API_URL` points the frontend proxy to the primary Django API server. `NEXT_PUBLIC_FALLBACK_API_URL` can point to the Render backend URL as a backup when a custom API subdomain is unavailable. `DEMO_USERNAME` and `DEMO_PASSWORD` power the one-click demo access button without committing demo credentials to source control.
 
 ### Run the Application
 
@@ -155,7 +156,9 @@ npm run build
 ## Deployment Notes
 
 - Configure `NEXT_PUBLIC_API_URL` for the deployed backend URL.
+- Configure `NEXT_PUBLIC_FALLBACK_API_URL` with the Render backend URL if the primary API uses a custom domain.
 - Confirm the backend CORS and CSRF trusted origins include the deployed frontend URL.
+- Confirm backend CORS allows the deployed frontend origin before relying on direct fallback API requests.
 - Use HTTPS in production so secure cookies work correctly across the frontend and backend.
 
 ## License

@@ -1,6 +1,7 @@
 import { ApiResponse } from '@/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const FALLBACK_BASE_URL = process.env.NEXT_PUBLIC_FALLBACK_API_URL;
 const ACCESS_TOKEN_KEY = 'niyara_access_token';
 const REFRESH_TOKEN_KEY = 'niyara_refresh_token';
 
@@ -49,9 +50,24 @@ export const clearAuthTokens = () => {
  * flow through Next.js rewrites (no CORS). On the server or for non-API
  * paths, fall back to the full BASE_URL.
  */
-function buildUrl(endpoint: string): string {
+function buildAbsoluteUrl(endpoint: string, baseUrl: string): string {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const normalizedBaseUrl = baseUrl.replace(/\/$/, '');
+
+  if (normalizedBaseUrl.endsWith('/api') && cleanEndpoint.startsWith('/api/')) {
+    return `${normalizedBaseUrl}${cleanEndpoint.substring(4)}`;
+  }
+  return `${normalizedBaseUrl}${cleanEndpoint}`;
+}
+
+function buildUrl(endpoint: string, useFallback = false): string {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const isClient = typeof window !== 'undefined';
+  const fallbackBaseUrl = FALLBACK_BASE_URL?.replace(/\/$/, '');
+
+  if (useFallback && fallbackBaseUrl) {
+    return buildAbsoluteUrl(cleanEndpoint, fallbackBaseUrl);
+  }
 
   if (isClient && cleanEndpoint.startsWith('/api/')) {
     // Relative URL → Next.js rewrites proxy to backend → zero CORS issues
@@ -59,11 +75,16 @@ function buildUrl(endpoint: string): string {
   }
 
   const baseUrl = BASE_URL?.replace(/\/$/, '') || '';
-  let url = `${baseUrl}${cleanEndpoint}`;
-  if (baseUrl.endsWith('/api') && cleanEndpoint.startsWith('/api/')) {
-    url = `${baseUrl}${cleanEndpoint.substring(4)}`;
-  }
-  return url;
+  return buildAbsoluteUrl(cleanEndpoint, baseUrl);
+}
+
+function canUseFallback(endpoint: string): boolean {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return Boolean(FALLBACK_BASE_URL) && cleanEndpoint.startsWith('/api/');
+}
+
+function shouldRetryWithFallback(response: Response): boolean {
+  return [502, 503, 504].includes(response.status);
 }
 
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
@@ -111,8 +132,19 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
   }
 
   const url = buildUrl(endpoint);
+  const fallbackUrl = canUseFallback(endpoint) ? buildUrl(endpoint, true) : null;
 
-  let response = await fetch(url, { ...options, headers });
+  let response;
+  try {
+    response = await fetch(url, { ...options, headers });
+  } catch (error) {
+    if (!fallbackUrl) throw error;
+    response = await fetch(fallbackUrl, { ...options, headers });
+  }
+
+  if (fallbackUrl && shouldRetryWithFallback(response)) {
+    response = await fetch(fallbackUrl, { ...options, headers });
+  }
 
   if (response.status === 401) {
     if (!isRefreshing) {
@@ -136,7 +168,7 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
             headers.set('Authorization', `Bearer ${refreshedAccessToken}`);
           }
           onRefreshed("token_refreshed");
-          response = await fetch(url, { ...options, headers });
+          response = await fetch(fallbackUrl || url, { ...options, headers });
         } else {
           throw new Error("Token refresh rejected");
         }
