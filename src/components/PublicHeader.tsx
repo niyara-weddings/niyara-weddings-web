@@ -1,11 +1,12 @@
 "use client";
 
 import React from 'react';
-import { Box, Button, IconButton, Avatar, Menu, MenuItem, ListItemIcon } from '@mui/material';
+import Image from 'next/image';
+import { Avatar, Box, Button, IconButton } from '@mui/material';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
-import { Menu as MenuIcon, Logout as LogoutIcon } from '@mui/icons-material';
+import { Menu as MenuIcon } from '@mui/icons-material';
 import { getMediaUrl } from '@/utils/api';
 
 import { useThemeMode } from '@/context/ThemeContext';
@@ -25,11 +26,8 @@ export default function PublicHeader({
     const router = useRouter();
     const pathname = usePathname();
     const { mode, toggleColorMode } = useThemeMode();
-    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
 
-    const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-    const handleClose = () => setAnchorEl(null);
-    const handleLogout = () => { handleClose(); logout(); router.push('/login'); };
+    const handleLogout = () => { logout(); router.push('/login'); };
 
     const menuItems = [
         { text: 'Dashboard', path: '/dashboard' },
@@ -57,10 +55,12 @@ export default function PublicHeader({
             {/* Logo area - Simplified */}
             <Box sx={{ display: 'flex', alignItems: 'center', mr: { xs: 1, md: 4 } }}>
                 <Link href="/" passHref style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-                    <img
+                    <Image
                         src={mode === 'light' ? "/niyara-logo-main.jpg" : "/niyara-logo-white.png"}
                         alt="Niyara Weddings"
-                        style={{ height: '35px', objectFit: 'contain' }}
+                        width={120}
+                        height={43}
+                        style={{ height: '35px', width: 'auto', objectFit: 'contain' }}
                     />
                 </Link>
             </Box>
@@ -198,12 +198,6 @@ export default function PublicHeader({
                     </Link>
                 </Box>
             )}
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-                <MenuItem onClick={handleLogout}><ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>Logout</MenuItem>
-            </Menu>
         </Box>
     );
 }

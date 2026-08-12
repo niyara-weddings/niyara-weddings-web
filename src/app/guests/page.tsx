@@ -1,7 +1,7 @@
 // src/app/guests/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Button,
@@ -125,11 +125,7 @@ export default function GuestsPage() {
   const [filterRsvp, setFilterRsvp] = useState<string>('');
   const PAGE_SIZE = 15;
 
-  useEffect(() => {
-    fetchGuests();
-  }, [refreshKey, page, filterRsvp]);
-
-  const fetchGuests = async () => {
+  const fetchGuests = useCallback(async () => {
     try {
       setLoading(true);
       let url = `/api/v1/guests/list/?page=${page}`;
@@ -151,7 +147,11 @@ export default function GuestsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, filterRsvp]);
+
+  useEffect(() => {
+    fetchGuests();
+  }, [fetchGuests, refreshKey]);
 
   const handleDeleteGuest = async (guestId: number) => {
     if (!window.confirm('Are you sure you want to delete this guest?')) {

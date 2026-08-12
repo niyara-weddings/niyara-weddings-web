@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Next.js middleware that proxies /api/* requests to the Django backend.
+ * Next.js proxy that forwards /api/* requests to the Django backend.
  *
- * Why middleware instead of next.config.ts rewrites?
+ * Why proxy instead of next.config.ts rewrites?
  * - Next.js rewrite `:path*` wildcards strip trailing slashes.
- * - Django requires trailing slashes on all endpoints (especially POST).
- * - This middleware guarantees the trailing slash is preserved.
+ * - Django requires trailing slashes on API endpoints.
+ * - This proxy guarantees the trailing slash is preserved.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  if (pathname === "/api/demo-credentials") {
+    return NextResponse.next();
+  }
 
   // Only handle API routes
   if (!pathname.startsWith("/api")) {

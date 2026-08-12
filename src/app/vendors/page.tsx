@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Button,
@@ -44,11 +44,7 @@ function VendorsPageContent() {
   const [totalCount, setTotalCount] = useState(0);
   const PAGE_SIZE = 15;
 
-  useEffect(() => {
-    fetchVendors();
-  }, [refreshKey, page]);
-
-  const fetchVendors = async () => {
+  const fetchVendors = useCallback(async () => {
     try {
       setLoading(true);
       const result = await apiGet(`/api/v1/vendors/list/?page=${page}`);
@@ -66,7 +62,11 @@ function VendorsPageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [fetchVendors, refreshKey]);
 
   const handleDeleteVendor = async (vendorId: number) => {
     if (!window.confirm('Are you sure you want to delete this vendor?')) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Button,
@@ -161,11 +161,7 @@ function TasksPageContent() {
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const PAGE_SIZE = 15;
 
-  useEffect(() => {
-    fetchTasks();
-  }, [refreshKey, page, filterAssignedTo, filterStatus]);
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
       let url = `/api/v1/tasks/list/?page=${page}`;
@@ -194,7 +190,11 @@ function TasksPageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, filterAssignedTo, filterStatus]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks, refreshKey]);
 
   const handleToggleTask = async (taskId: number, completed: boolean) => {
     try {

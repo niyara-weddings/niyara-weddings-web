@@ -16,6 +16,7 @@ import {
   ListItemText,
   Divider,
   Chip,
+  Stack,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -23,24 +24,23 @@ import {
   Task as TaskIcon,
   CheckCircle as CheckCircleIcon,
   CalendarMonth as CalendarIcon,
-  AccountBalanceWallet as BudgetIcon,
 } from '@mui/icons-material';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet } from '@/utils/api';
 
 const StatCard = ({ title, count, icon, color }: { title: string; count: number | null; icon: React.ReactNode; color: string }) => (
-  <Card sx={{ mb: 2 }}>
-    <CardContent>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box>
-          <Typography color="textSecondary" gutterBottom>
+  <Card sx={{ height: '100%', minHeight: 136, width: '100%' }}>
+    <CardContent sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography color="textSecondary" sx={{ mb: 1, lineHeight: 1.3 }}>
             {title}
           </Typography>
           <Typography variant="h5" sx={{ fontWeight: 'bold', color }}>
             {count !== null ? count : <CircularProgress size={24} />}
           </Typography>
         </Box>
-        <Box sx={{ color, opacity: 0.3, fontSize: 40 }}>
+        <Box sx={{ color, opacity: 0.3, display: 'flex', flexShrink: 0, '& svg': { fontSize: 42 } }}>
           {icon}
         </Box>
       </Box>
@@ -112,9 +112,9 @@ function Dashboard() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 }, px: { xs: 0, sm: 2 } }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'text.primary' }}>
+        <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'text.primary', fontSize: { xs: '1.75rem', md: '2.125rem' } }}>
           The Planning Storyboard
         </Typography>
 
@@ -130,9 +130,29 @@ function Dashboard() {
           </Box>
         ) : (
           <>
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
+                      Demo guide
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Start with the snapshot below, then use the navigation to review guests, vendors, tasks, and the wedding profile.
+                    </Typography>
+                  </Box>
+                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                    {['Check readiness', 'Review guests', 'Confirm vendors', 'Update tasks', 'Open Wedding Canvas'].map((step) => (
+                      <Chip key={step} label={step} size="small" sx={{ fontWeight: 700 }} />
+                    ))}
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
+
             {/* Top Row: Quick Stats (Full Width) */}
-            <Grid container spacing={2} sx={{ mb: 4 }}>
-              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+            <Grid container spacing={2} sx={{ mb: 4 }} alignItems="stretch">
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }} sx={{ display: 'flex' }}>
                 <StatCard
                   title="Total Guests"
                   count={stats.totalGuests}
@@ -140,7 +160,7 @@ function Dashboard() {
                   color="primary.main"
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }} sx={{ display: 'flex' }}>
                 <StatCard
                   title="RSVPs Accepted"
                   count={stats.guestRSVPd}
@@ -148,7 +168,7 @@ function Dashboard() {
                   color="info.main"
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }} sx={{ display: 'flex' }}>
                 <StatCard
                   title="Total Vendors"
                   count={stats.totalVendors}
@@ -156,7 +176,7 @@ function Dashboard() {
                   color="error.main"
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 2.4 }} sx={{ display: 'flex' }}>
                 <StatCard
                   title="Remaining Tasks"
                   count={stats.remainingTasks}
@@ -164,7 +184,7 @@ function Dashboard() {
                   color="warning.main"
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 6, lg: 2.4 }} sx={{ display: 'flex' }}>
                 <StatCard
                   title="Tasks Completed"
                   count={stats.completedTasks}
@@ -207,7 +227,7 @@ function Dashboard() {
                           No immediate milestones.
                         </Typography>
                         <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'left' }}>
-                          Relax and have some chai! You've officially earned a break. ☕️
+                          Relax and have some chai! You&apos;ve officially earned a break. ☕️
                         </Typography>
                       </Box>
                     )}
