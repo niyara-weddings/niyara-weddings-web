@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { setLogoutCallback, apiGet } from '@/utils/api';
-import { User, ApiResponse } from '@/types';
+import { setLogoutCallback, apiGet, clearAuthTokens, storeAuthTokens } from '@/utils/api';
+import { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (res.success && res.data) {
           setUser(res.data);
         }
-      } catch (err) {
+      } catch {
         // Not authenticated
         setUser(null);
       } finally {
@@ -55,13 +55,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleAuthResponse = async (response: Response) => {
-    const result = await response.json();
+    let result: any = {};
+
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error(`Authentication service returned an invalid response (${response.status})`);
+    }
 
     if (!response.ok || !result.success) {
       throw new Error(result.message || 'Authentication operation failed');
     }
 
     const userData = result.data.user;
+    storeAuthTokens(result.data.tokens);
     setUser(userData);
 
     return { success: true };
@@ -108,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error("Server logout failed", e);
     }
+    clearAuthTokens();
     setUser(null);
   };
 

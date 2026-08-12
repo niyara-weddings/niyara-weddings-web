@@ -12,7 +12,6 @@ import {
   Button,
   Typography,
   Alert,
-  useTheme,
 } from '@mui/material';
 import { apiPost, apiPut } from '@/utils/api';
 
@@ -49,8 +48,6 @@ const AddVendorModal = ({ open, onClose, onSuccess, vendor }: AddVendorModalProp
     { label: 'Cake', value: 'cake' },
     { label: 'Other', value: 'other' },
   ];
-
-  const theme = useTheme();
 
   useEffect(() => {
     if (vendor) {

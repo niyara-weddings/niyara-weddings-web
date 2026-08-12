@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Container,
   Box,
@@ -107,10 +108,12 @@ export default function RegisterPage() {
             }}
           >
             <Box sx={{ mb: 2 }}>
-              <img
+              <Image
                 src={theme.palette.mode === 'light' ? "/niyara-logo-main.jpg" : "/niyara-logo-white.png"}
                 alt="Niyara Weddings"
-                style={{ height: '50px', objectFit: 'contain' }}
+                width={160}
+                height={57}
+                style={{ height: '50px', width: 'auto', objectFit: 'contain' }}
               />
             </Box>
             <Typography variant="body2" color="text.secondary">

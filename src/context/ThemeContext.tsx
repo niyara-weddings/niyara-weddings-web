@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { PaletteMode } from '@mui/material';
 
@@ -17,17 +17,12 @@ const ThemeContext = createContext<ThemeContextType>({
 export const useThemeMode = () => useContext(ThemeContext);
 
 export const ThemeContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const [mode, setMode] = useState<PaletteMode>('light');
+    const [mode, setMode] = useState<PaletteMode>(() => {
+        if (typeof window === 'undefined') return 'light';
 
-    useEffect(() => {
-        const savedMode = localStorage.getItem('themeMode') as PaletteMode;
-        if (savedMode) {
-            setMode(savedMode);
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            // Optional: auto-detect system preference if no manual setting
-            // setMode('dark');
-        }
-    }, []);
+        const savedMode = localStorage.getItem('themeMode');
+        return savedMode === 'dark' || savedMode === 'light' ? savedMode : 'light';
+    });
 
     const themeMode = useMemo(
         () => ({

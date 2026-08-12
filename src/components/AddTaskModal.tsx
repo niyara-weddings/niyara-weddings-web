@@ -12,7 +12,6 @@ import {
   Button,
   Typography,
   Alert,
-  useTheme,
 } from '@mui/material';
 import { apiPost, apiPut } from '@/utils/api';
 
@@ -55,8 +54,6 @@ const AddTaskModal = ({ open, onClose, onSuccess, task }: AddTaskModalProps) => 
       });
     }
   }, [task, open]);
-
-  const theme = useTheme();
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;

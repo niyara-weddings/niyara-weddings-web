@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Container,
   Box,
@@ -22,7 +23,6 @@ import PublicFooter from '@/components/PublicFooter';
 export default function LoginPage() {
   const theme = useTheme();
   const [formData, setFormData] = useState({
-    // ... (rest of the file remains same, I'm just ensuring initialization is there)
     username: '',
     password: '',
   });
@@ -36,6 +36,28 @@ export default function LoginPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleUseDemoCredentials = async () => {
+    try {
+      const response = await fetch('/api/demo-credentials', {
+        cache: 'no-store',
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Demo access is not configured');
+      }
+
+      setFormData({
+        username: result.data.username,
+        password: result.data.password,
+      });
+      setError('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Demo access is not configured';
+      setError(message);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -98,10 +120,12 @@ export default function LoginPage() {
             }}
           >
             <Box sx={{ mb: 2 }}>
-              <img
+              <Image
                 src={theme.palette.mode === 'light' ? "/niyara-logo-main.jpg" : "/niyara-logo-white.png"}
                 alt="Niyara Weddings"
-                style={{ height: '50px', objectFit: 'contain' }}
+                width={160}
+                height={57}
+                style={{ height: '50px', width: 'auto', objectFit: 'contain' }}
               />
             </Box>
             <Typography variant="h4" sx={{ mb: 1, fontWeight: 800, color: 'text.primary', letterSpacing: '-0.5px' }}>
@@ -117,6 +141,40 @@ export default function LoginPage() {
               {error}
             </Alert>
           )}
+
+          <Alert
+            severity="info"
+            sx={{
+              mb: 3,
+              borderRadius: 2,
+              alignItems: 'flex-start',
+              '& .MuiAlert-message': { width: '100%' },
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                Demo access
+              </Typography>
+              <Typography variant="body2">
+                Preview the dashboard with the prepared demo account.
+              </Typography>
+              <Button
+                type="button"
+                size="small"
+                variant="outlined"
+                onClick={handleUseDemoCredentials}
+                sx={{
+                  alignSelf: 'flex-start',
+                  mt: 0.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 700,
+                }}
+              >
+                Use demo credentials
+              </Button>
+            </Box>
+          </Alert>
 
           <Box component="form" onSubmit={handleSubmit} noValidate>
             <TextField

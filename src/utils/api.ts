@@ -1,6 +1,8 @@
 import { ApiResponse } from '@/types';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const ACCESS_TOKEN_KEY = 'niyara_access_token';
+const REFRESH_TOKEN_KEY = 'niyara_refresh_token';
 
 let _logoutCallback: (() => void) | null = null;
 let isRefreshing = false;
@@ -17,6 +19,29 @@ const subscribeTokenRefresh = (cb: (access_token: string) => void) => {
 const onRefreshed = (access_token: string) => {
   refreshSubscribers.map((cb) => cb(access_token));
   refreshSubscribers = [];
+};
+
+const getStoredToken = (key: string): string | null => {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem(key);
+};
+
+export const storeAuthTokens = (tokens?: { access?: string; refresh?: string }) => {
+  if (typeof window === 'undefined' || !tokens) return;
+
+  if (tokens.access) {
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access);
+  }
+
+  if (tokens.refresh) {
+    window.localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh);
+  }
+};
+
+export const clearAuthTokens = () => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  window.localStorage.removeItem(REFRESH_TOKEN_KEY);
 };
 
 /**
@@ -75,6 +100,11 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
   const headers = new Headers(options.headers || {});
   options.credentials = 'include';
 
+  const accessToken = getStoredToken(ACCESS_TOKEN_KEY);
+  if (accessToken && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
+  }
+
   // Only set Content-Type for requests that have a body
   if (options.body && !headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
@@ -89,20 +119,29 @@ async function fetchWithInterceptor(endpoint: string, options: RequestInit = {})
       isRefreshing = true;
       try {
         const refreshUrl = buildUrl('/api/v1/auth/token/refresh/');
+        const refreshToken = getStoredToken(REFRESH_TOKEN_KEY);
 
         const refreshRes = await fetch(refreshUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          body: refreshToken ? JSON.stringify({ refresh: refreshToken }) : undefined,
           credentials: 'include'
         });
 
         if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          storeAuthTokens(refreshData.data?.tokens);
+          const refreshedAccessToken = refreshData.data?.tokens?.access || getStoredToken(ACCESS_TOKEN_KEY);
+          if (refreshedAccessToken) {
+            headers.set('Authorization', `Bearer ${refreshedAccessToken}`);
+          }
           onRefreshed("token_refreshed");
           response = await fetch(url, { ...options, headers });
         } else {
           throw new Error("Token refresh rejected");
         }
       } catch {
+        clearAuthTokens();
         if (_logoutCallback) _logoutCallback();
       } finally {
         isRefreshing = false;

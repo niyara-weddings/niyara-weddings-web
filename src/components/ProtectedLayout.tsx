@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  AppBar,
   Box,
   CssBaseline,
   Drawer,
@@ -13,12 +12,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
-  Typography,
   Divider,
-  Avatar,
-  Menu,
-  MenuItem,
   Button,
   CircularProgress,
 } from '@mui/material';
@@ -28,12 +22,10 @@ import {
   Store as StoreIcon,
   Assignment as TaskIcon,
   AccountCircle as ProfileIcon,
-  Menu as MenuIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { getMediaUrl } from '@/utils/api';
 import Link from 'next/link';
 import PublicHeader from '@/components/PublicHeader';
 import PublicFooter from '@/components/PublicFooter';
@@ -47,11 +39,11 @@ const StreamIcon = (props: any) => (
 );
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { user, logout, loading, isAuthenticated } = useAuth();
+  const { logout, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [desktopOpen, setDesktopOpen] = useState(true);
+  const [desktopOpen, setDesktopOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {

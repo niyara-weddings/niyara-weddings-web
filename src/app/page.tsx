@@ -38,7 +38,7 @@ const GlassCard = styled(Paper)(({ theme }) => ({
   animation: 'fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards',
 }));
 
-const RedButton = styled(Button)(({ theme }) => ({
+const RedButton = styled(Button)(() => ({
   padding: '12px 32px',
   fontSize: '1.1rem',
   fontWeight: 700,

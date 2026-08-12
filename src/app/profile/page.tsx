@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
-import { apiGet, apiPut, apiPost, apiPatch } from '@/utils/api';
+import { apiGet, apiPost, apiPatch } from '@/utils/api';
 import { useAuth } from '@/context/AuthContext';
 
 function ProfilePageContent() {
