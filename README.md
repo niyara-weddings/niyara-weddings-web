@@ -1,4 +1,4 @@
-# Niyara Wedding Planner Frontend
+# Niyara Weddings Web
 
 ![Next.js](https://img.shields.io/badge/-Next.js-000000?logo=nextdotjs&logoColor=white&style=for-the-badge)
 ![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=000000&style=for-the-badge)
@@ -7,7 +7,7 @@
 ![ESLint](https://img.shields.io/badge/-ESLint-4B32C3?logo=eslint&logoColor=white&style=for-the-badge)
 ![Render](https://img.shields.io/badge/-Render-46E3B7?logo=render&logoColor=000000&style=for-the-badge)
 
-**Niyara Wedding Planner Frontend** is a polished Next.js client for the Wedding Planning API. It gives couples a premium dashboard for tracking wedding progress, managing tasks, organizing guests, maintaining vendor details, and updating their wedding profile from one responsive interface.
+**Niyara Weddings Web** is a polished Next.js client for the Wedding Planning API. It gives couples a premium dashboard for tracking wedding progress, managing tasks, organizing guests, maintaining vendor details, and updating their wedding profile from one responsive interface.
 
 The frontend is designed as the user-facing experience for the Django REST backend and uses cookie-based JWT authentication through API proxy routes.
 
@@ -52,8 +52,9 @@ The frontend is designed as the user-facing experience for the Django REST backe
 
 ## Live Demo
 
-- **Frontend:** [https://wedding-planner-frontend-od7k.onrender.com/login](https://wedding-planner-frontend-od7k.onrender.com/login)
-- **Backend API:** [https://niyara-wedding-planner-backend.onrender.com/api/docs/](https://niyara-wedding-planner-backend.onrender.com/api/docs/)
+- **Frontend:** [https://weddings.cycy.codes/login](https://weddings.cycy.codes/login)
+- **Backend API:** [https://api-weddings.cycy.codes/api/docs/](https://api-weddings.cycy.codes/api/docs/)
+- **Fallback Backend:** [https://niyara-wedding-planner-backend.onrender.com/api/docs/](https://niyara-wedding-planner-backend.onrender.com/api/docs/)
 
 ## Demo Access
 
@@ -72,8 +73,8 @@ Demo access is available directly on the login page, with a one-click fill optio
 Clone the repository:
 
 ```bash
-git clone git@github.com:CynthiaWahome/wedding-planner-frontend.git
-cd wedding-planner-frontend
+git clone git@github.com:niyara-weddings/niyara-weddings-web.git
+cd niyara-weddings-web
 ```
 
 Install dependencies:
@@ -93,7 +94,7 @@ DEMO_USERNAME=admin
 DEMO_PASSWORD=<demo-password>
 ```
 
-`NEXT_PUBLIC_API_URL` points the frontend proxy to the primary Django API server. `NEXT_PUBLIC_FALLBACK_API_URL` can point to the Render backend URL as a backup when a custom API subdomain is unavailable. `DEMO_USERNAME` and `DEMO_PASSWORD` power the one-click demo access button without committing demo credentials to source control.
+`NEXT_PUBLIC_API_URL` points the frontend proxy to the primary Django API server. In production, set it to `https://api-weddings.cycy.codes`. `NEXT_PUBLIC_FALLBACK_API_URL` can point to the Render backend URL as a backup when the custom API subdomain is unavailable. `DEMO_USERNAME` and `DEMO_PASSWORD` power the one-click demo access button without committing demo credentials to source control.
 
 ### Run the Application
 
@@ -134,7 +135,8 @@ This frontend pairs with the Wedding Planning API:
 - **Local API:** [http://localhost:8000](http://localhost:8000)
 - **Swagger Docs:** [http://localhost:8000/api/docs/](http://localhost:8000/api/docs/)
 - **API Schema:** [http://localhost:8000/api/schema/](http://localhost:8000/api/schema/)
-- **Live Swagger Docs:** [https://niyara-wedding-planner-backend.onrender.com/api/docs/](https://niyara-wedding-planner-backend.onrender.com/api/docs/)
+- **Live Swagger Docs:** [https://api-weddings.cycy.codes/api/docs/](https://api-weddings.cycy.codes/api/docs/)
+- **Fallback Swagger Docs:** [https://niyara-wedding-planner-backend.onrender.com/api/docs/](https://niyara-wedding-planner-backend.onrender.com/api/docs/)
 
 Core API areas:
 
