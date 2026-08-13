@@ -16,7 +16,7 @@ import {
   ListItemText,
   Divider,
   Chip,
-  Stack,
+  Button,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -24,6 +24,7 @@ import {
   Task as TaskIcon,
   CheckCircle as CheckCircleIcon,
   CalendarMonth as CalendarIcon,
+  HelpOutline as HelpOutlineIcon,
 } from '@mui/icons-material';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { apiGet } from '@/utils/api';
@@ -48,7 +49,7 @@ const StatCard = ({ title, count, icon, color }: { title: string; count: number 
   </Card>
 );
 
-function Dashboard() {
+function Dashboard({ onStartTour }: { onStartTour: () => void }) {
   const [stats, setStats] = useState<{
     totalGuests: number | null;
     guestRSVPd: number | null;
@@ -114,9 +115,35 @@ function Dashboard() {
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 }, px: { xs: 0, sm: 2 } }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'text.primary', fontSize: { xs: '1.75rem', md: '2.125rem' } }}>
-          The Planning Storyboard
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', fontSize: { xs: '1.75rem', md: '2.125rem' } }}>
+            The Planning Storyboard
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<HelpOutlineIcon />}
+            onClick={onStartTour}
+            data-tour="tour-launcher"
+            sx={{
+              borderRadius: 2,
+              fontWeight: 800,
+              textTransform: 'none',
+              alignSelf: { xs: 'stretch', sm: 'center' },
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Start tour
+          </Button>
+        </Box>
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -130,28 +157,8 @@ function Dashboard() {
           </Box>
         ) : (
           <>
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Stack spacing={2}>
-                  <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
-                      Demo guide
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Start with the snapshot below, then use the navigation to review guests, vendors, tasks, and the wedding profile.
-                    </Typography>
-                  </Box>
-                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                    {['Check readiness', 'Review guests', 'Confirm vendors', 'Update tasks', 'Open Wedding Canvas'].map((step) => (
-                      <Chip key={step} label={step} size="small" sx={{ fontWeight: 700 }} />
-                    ))}
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-
             {/* Top Row: Quick Stats (Full Width) */}
-            <Grid container spacing={2} sx={{ mb: 4 }} alignItems="stretch">
+            <Grid container spacing={2} sx={{ mb: 4 }} alignItems="stretch" data-tour="dashboard-summary">
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }} sx={{ display: 'flex' }}>
                 <StatCard
                   title="Total Guests"
@@ -197,7 +204,7 @@ function Dashboard() {
             {/* Bottom Row: Intelligence Cards (Equal Height) */}
             <Grid container spacing={3} alignItems="stretch">
               {/* Left Column: Dynamic Milestones */}
-              <Grid size={{ xs: 12, md: 8 }} sx={{ display: 'flex' }}>
+              <Grid size={{ xs: 12, md: 8 }} sx={{ display: 'flex' }} data-tour="dashboard-milestones">
                 <Card sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -236,7 +243,7 @@ function Dashboard() {
               </Grid>
 
               {/* Right Column: Readiness Score */}
-              <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
+              <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }} data-tour="dashboard-readiness">
                 <Card sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
                   <CardContent sx={{ textAlign: 'center', width: '100%', flexGrow: 1 }}>
                     <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -347,7 +354,7 @@ function Dashboard() {
 export default function DashboardPage() {
   return (
     <ProtectedLayout>
-      <Dashboard />
+      {({ startTour }) => <Dashboard onStartTour={startTour} />}
     </ProtectedLayout>
   )
 }
