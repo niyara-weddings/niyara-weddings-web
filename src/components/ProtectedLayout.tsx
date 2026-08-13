@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  CssBaseline,
   Drawer,
   IconButton,
   List,
@@ -29,6 +28,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import PublicHeader from '@/components/PublicHeader';
 import PublicFooter from '@/components/PublicFooter';
+import DemoTour, { shouldAutoStartDemoTour } from '@/components/DemoTour';
 
 const drawerWidth = 260;
 
@@ -38,18 +38,32 @@ const StreamIcon = (props: any) => (
   </svg>
 );
 
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+type ProtectedLayoutProps = {
+  children: React.ReactNode | ((props: { startTour: () => void }) => React.ReactNode);
+};
+
+export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const { logout, loading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
+  const [tourRunning, setTourRunning] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/login');
     }
   }, [loading, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && pathname === '/dashboard' && shouldAutoStartDemoTour()) {
+      const timer = window.setTimeout(() => setTourRunning(true), 600);
+      return () => window.clearTimeout(timer);
+    }
+
+    return undefined;
+  }, [loading, isAuthenticated, pathname]);
 
   if (loading || !isAuthenticated) {
     return (
@@ -84,7 +98,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         </IconButton>
       </Box>
       <Divider />
-      <List sx={{ flexGrow: 1 }}>
+      <List sx={{ flexGrow: 1 }} data-tour="sidebar-nav">
         {menuItems.map((item) => (
           <Link href={item.path} passHref key={item.text} style={{ textDecoration: 'none', color: 'inherit' }}>
             <ListItem disablePadding sx={{ display: 'block' }}>
@@ -151,8 +165,6 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', bgcolor: 'background.default' }}>
-      <CssBaseline />
-
       {/* 1. Desktop Sidebar - Full Height */}
       <Drawer
         variant="permanent"
@@ -192,8 +204,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
             flexDirection: 'column',
           }}
         >
-          <Box sx={{ px: { xs: 2, md: 6 }, py: { xs: 4, md: 6 }, flexGrow: 1, width: '100%' }} className="fade-in-up">
-            {children}
+          <Box sx={{ px: { xs: 2, md: 6 }, py: { xs: 3, md: 5 }, flexGrow: 1, width: '100%' }} className="fade-in-up">
+            {typeof children === 'function'
+              ? children({ startTour: () => setTourRunning(true) })
+              : children}
           </Box>
           <PublicFooter />
         </Box>
@@ -212,6 +226,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       >
         {drawer}
       </Drawer>
+      <DemoTour run={tourRunning} onClose={() => setTourRunning(false)} />
     </Box>
   );
 }

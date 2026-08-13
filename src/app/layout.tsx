@@ -3,8 +3,8 @@ import './globals.css';
 import Providers from '@/components/Providers';
 
 export const metadata = {
-  title: "Niyara Weddings",
-  description: "Plan your perfect wedding",
+  title: "Niyara Weddings | Wedding Planning Dashboard",
+  description: "Responsive wedding planning dashboard for managing guests, tasks, vendors, budgets, timelines, and couple profiles.",
   icons: {
     icon: [
       { url: "/favicon.ico?v=niyara-2", sizes: "any" },
